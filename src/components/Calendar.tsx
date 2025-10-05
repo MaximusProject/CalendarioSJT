@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,24 +12,26 @@ interface CalendarProps {
   onDayClick: (date: Date, assignments: Assignment[]) => void;
 }
 
-// Define la interfaz LocalComment para localStorage
 interface LocalComment {
   id: string;
   text: string;
-  date: string; // Se guarda como string en JSON
-  day: string; // formato YYYY-MM-DD
+  date: string;
+  day: string;
 }
 
-export function Calendar({ onDayClick }: CalendarProps) {
+export function Calendar({ onDayClick }: CalendarProps) {  // ✅ CORREGIDO: usa CalendarProps
   const [currentDate, setCurrentDate] = useState(new Date());
   const [daysWithComments, setDaysWithComments] = useState<Set<string>>(new Set());
   const { isAuthenticated } = usePinAuth();
 
-  const monthStart = startOfMonth(currentDate);
-  const monthEnd = endOfMonth(currentDate);
-  const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  // ✅ USAR useMemo PARA EVITAR RECÁLCULOS EN CADA RENDER
+  const monthStart = useMemo(() => startOfMonth(currentDate), [currentDate]);
+  const monthEnd = useMemo(() => endOfMonth(currentDate), [currentDate]);
+  const daysInMonth = useMemo(() => eachDayOfInterval({ start: monthStart, end: monthEnd }), [monthStart, monthEnd]);
+  const firstDayOfWeek = useMemo(() => getDay(monthStart), [monthStart]);
+  const emptyDays = useMemo(() => Array.from({ length: firstDayOfWeek }, (_, i) => i), [firstDayOfWeek]);
 
-  // Effect para cargar comentarios desde localStorage
+  // ✅ CORREGIR EL useEffect - SOLO DEPENDENCIAS NECESARIAS
   useEffect(() => {
     if (!isAuthenticated) {
       setDaysWithComments(new Set());
@@ -50,10 +52,7 @@ export function Calendar({ onDayClick }: CalendarProps) {
     } else {
       setDaysWithComments(new Set());
     }
-  }, [currentDate, isAuthenticated, monthStart, monthEnd]);
-
-  const firstDayOfWeek = getDay(monthStart);
-  const emptyDays = Array.from({ length: firstDayOfWeek }, (_, i) => i);
+  }, [currentDate, isAuthenticated]); // ✅ SOLO estas dependencias
 
   const getAssignmentsForDay = (date: Date): Assignment[] => {
     return assignments.filter(assignment => {
