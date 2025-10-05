@@ -10,6 +10,11 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Calendar } from "lucide-react";
 
+// Importaciones NUEVAS para comentarios
+import { DayComments } from "./DayComments";
+import { usePinAuth } from "@/hooks/usePinAuth";
+import { Separator } from "@/components/ui/separator";
+
 interface DayDetailsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -23,6 +28,9 @@ export function DayDetailsDialog({
   date,
   assignments,
 }: DayDetailsDialogProps) {
+  // Hook NUEVO para autenticación
+  const { isAuthenticated } = usePinAuth();
+  
   if (!date) return null;
 
   return (
@@ -51,6 +59,14 @@ export function DayDetailsDialog({
                 No hay tareas programadas para este día
               </p>
             </div>
+          )}
+
+          {/* SECCIÓN NUEVA: Comentarios (solo para usuarios autenticados) */}
+          {isAuthenticated && (
+            <>
+              <Separator className="my-4" />
+              <DayComments date={date} />
+            </>
           )}
         </div>
       </DialogContent>

@@ -1,22 +1,56 @@
-import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { assignments, Assignment } from "@/data/assignments";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, isToday, isBefore, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
+import { usePinAuth } from "@/hooks/usePinAuth";
 
 interface CalendarProps {
   onDayClick: (date: Date, assignments: Assignment[]) => void;
 }
 
+// Define la interfaz LocalComment para localStorage
+interface LocalComment {
+  id: string;
+  text: string;
+  date: string; // Se guarda como string en JSON
+  day: string; // formato YYYY-MM-DD
+}
+
 export function Calendar({ onDayClick }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [daysWithComments, setDaysWithComments] = useState<Set<string>>(new Set());
+  const { isAuthenticated } = usePinAuth();
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
+
+  // Effect para cargar comentarios desde localStorage
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setDaysWithComments(new Set());
+      return;
+    }
+
+    // Cargar días con comentarios desde localStorage
+    const savedComments = localStorage.getItem('dayComments');
+    if (savedComments) {
+      try {
+        const allComments: LocalComment[] = JSON.parse(savedComments);
+        const datesWithComments = new Set(allComments.map(comment => comment.day));
+        setDaysWithComments(datesWithComments);
+      } catch (error) {
+        console.error("Error loading comments from localStorage:", error);
+        setDaysWithComments(new Set());
+      }
+    } else {
+      setDaysWithComments(new Set());
+    }
+  }, [currentDate, isAuthenticated, monthStart, monthEnd]);
 
   const firstDayOfWeek = getDay(monthStart);
   const emptyDays = Array.from({ length: firstDayOfWeek }, (_, i) => i);
@@ -83,6 +117,8 @@ export function Calendar({ onDayClick }: CalendarProps) {
           const dayAssignments = getAssignmentsForDay(day);
           const isPast = isBefore(day, startOfDay(new Date()));
           const isCurrentDay = isToday(day);
+          const dateString = format(day, "yyyy-MM-dd");
+          const hasComments = daysWithComments.has(dateString);
 
           return (
             <button
@@ -90,7 +126,7 @@ export function Calendar({ onDayClick }: CalendarProps) {
               onClick={() => onDayClick(day, dayAssignments)}
               className={cn(
                 "aspect-square rounded-lg p-2 text-sm transition-all hover:scale-105",
-                "flex flex-col items-center justify-start gap-1",
+                "flex flex-col items-center justify-start gap-1 relative",
                 "border border-border bg-card hover:bg-accent hover:shadow-md",
                 isCurrentDay && "border-2 border-primary bg-primary/10",
                 isPast && !isCurrentDay && "opacity-50",
@@ -114,6 +150,10 @@ export function Calendar({ onDayClick }: CalendarProps) {
                     />
                   ))}
                 </div>
+              )}
+              
+              {hasComments && isAuthenticated && (
+                <Tag className="h-3 w-3 text-primary absolute top-1 right-1" />
               )}
             </button>
           );
