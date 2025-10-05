@@ -1,17 +1,26 @@
+<<<<<<< HEAD
 import { useState, useEffect, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Tag } from "lucide-react";
+=======
+import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { assignments, Assignment } from "@/data/assignments";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, isToday, isBefore, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
+<<<<<<< HEAD
 import { usePinAuth } from "@/hooks/usePinAuth";
+=======
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
 
 interface CalendarProps {
   onDayClick: (date: Date, assignments: Assignment[]) => void;
 }
 
+<<<<<<< HEAD
 interface LocalComment {
   id: string;
   text: string;
@@ -53,6 +62,17 @@ export function Calendar({ onDayClick }: CalendarProps) {  // ✅ CORREGIDO: usa
       setDaysWithComments(new Set());
     }
   }, [currentDate, isAuthenticated]); // ✅ SOLO estas dependencias
+=======
+export function Calendar({ onDayClick }: CalendarProps) {
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const monthStart = startOfMonth(currentDate);
+  const monthEnd = endOfMonth(currentDate);
+  const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
+
+  const firstDayOfWeek = getDay(monthStart);
+  const emptyDays = Array.from({ length: firstDayOfWeek }, (_, i) => i);
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
 
   const getAssignmentsForDay = (date: Date): Assignment[] => {
     return assignments.filter(assignment => {
@@ -116,8 +136,11 @@ export function Calendar({ onDayClick }: CalendarProps) {  // ✅ CORREGIDO: usa
           const dayAssignments = getAssignmentsForDay(day);
           const isPast = isBefore(day, startOfDay(new Date()));
           const isCurrentDay = isToday(day);
+<<<<<<< HEAD
           const dateString = format(day, "yyyy-MM-dd");
           const hasComments = daysWithComments.has(dateString);
+=======
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
 
           return (
             <button
@@ -125,7 +148,11 @@ export function Calendar({ onDayClick }: CalendarProps) {  // ✅ CORREGIDO: usa
               onClick={() => onDayClick(day, dayAssignments)}
               className={cn(
                 "aspect-square rounded-lg p-2 text-sm transition-all hover:scale-105",
+<<<<<<< HEAD
                 "flex flex-col items-center justify-start gap-1 relative",
+=======
+                "flex flex-col items-center justify-start gap-1",
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
                 "border border-border bg-card hover:bg-accent hover:shadow-md",
                 isCurrentDay && "border-2 border-primary bg-primary/10",
                 isPast && !isCurrentDay && "opacity-50",
@@ -150,14 +177,21 @@ export function Calendar({ onDayClick }: CalendarProps) {  // ✅ CORREGIDO: usa
                   ))}
                 </div>
               )}
+<<<<<<< HEAD
               
               {hasComments && isAuthenticated && (
                 <Tag className="h-3 w-3 text-primary absolute top-1 right-1" />
               )}
+=======
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
             </button>
           );
         })}
       </div>
     </Card>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736

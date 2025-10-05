@@ -10,11 +10,14 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Calendar } from "lucide-react";
 
+<<<<<<< HEAD
 // Importaciones NUEVAS para comentarios
 import { DayComments } from "./DayComments";
 import { usePinAuth } from "@/hooks/usePinAuth";
 import { Separator } from "@/components/ui/separator";
 
+=======
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
 interface DayDetailsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -28,9 +31,12 @@ export function DayDetailsDialog({
   date,
   assignments,
 }: DayDetailsDialogProps) {
+<<<<<<< HEAD
   // Hook NUEVO para autenticación
   const { isAuthenticated } = usePinAuth();
   
+=======
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
   if (!date) return null;
 
   return (
@@ -60,6 +66,7 @@ export function DayDetailsDialog({
               </p>
             </div>
           )}
+<<<<<<< HEAD
 
           {/* SECCIÓN NUEVA: Comentarios (solo para usuarios autenticados) */}
           {isAuthenticated && (
@@ -68,8 +75,14 @@ export function DayDetailsDialog({
               <DayComments date={date} />
             </>
           )}
+=======
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
         </div>
       </DialogContent>
     </Dialog>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736

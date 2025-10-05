@@ -2,16 +2,22 @@ import { useState } from "react";
 import { Calendar } from "@/components/Calendar";
 import { NextWeekSection } from "@/components/NextWeekSection";
 import { DayDetailsDialog } from "@/components/DayDetailsDialog";
+<<<<<<< HEAD
 import { PinDialog } from "@/components/PinDialog"; // ✅ NUEVA IMPORTACIÓN
 import { Assignment } from "@/data/assignments";
 import { BookOpen, Lock, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button"; // ✅ NUEVA IMPORTACIÓN
 import { usePinAuth } from "@/hooks/usePinAuth"; // ✅ NUEVA IMPORTACIÓN
+=======
+import { Assignment } from "@/data/assignments";
+import { BookOpen } from "lucide-react";
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
 
 const Index = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedAssignments, setSelectedAssignments] = useState<Assignment[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+<<<<<<< HEAD
   const [pinDialogOpen, setPinDialogOpen] = useState(false); // ✅ NUEVO ESTADO
 
   // ✅ NUEVO HOOK DE AUTENTICACIÓN
@@ -19,6 +25,8 @@ const Index = () => {
 
   // ✅ DEBUG TEMPORAL - AÑADE ESTO
   console.log("🔐 Estado de autenticación:", isAuthenticated);
+=======
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
 
   const handleDayClick = (date: Date, assignments: Assignment[]) => {
     setSelectedDate(date);
@@ -30,6 +38,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-6">
+<<<<<<< HEAD
           <div className="flex items-center justify-between gap-3"> {/* ✅ CAMBIADO: justify-between */}
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10">
@@ -66,6 +75,17 @@ const Index = () => {
                   Acceder
                 </Button>
               )}
+=======
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10">
+              <BookOpen className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold">Mi Calendario Académico</h1>
+              <p className="text-sm text-muted-foreground">
+                Organiza y visualiza todas tus tareas y evaluaciones
+              </p>
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
             </div>
           </div>
         </div>
@@ -88,11 +108,18 @@ const Index = () => {
         date={selectedDate}
         assignments={selectedAssignments}
       />
+<<<<<<< HEAD
 
       {/* ✅ NUEVO: Diálogo de PIN */}
       <PinDialog open={pinDialogOpen} onOpenChange={setPinDialogOpen} />
+=======
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
     </div>
   );
 };
 
+<<<<<<< HEAD
 export default Index;
+=======
+export default Index;
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736

@@ -99,7 +99,11 @@ export const assignments: Assignment[] = [
     type: "Prueba escrita",
     points: 4,
     percentage: 20,
+<<<<<<< HEAD
     date: "2025-10-30",
+=======
+    date: "2025-10-27",
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
     color: "ghc"
   },
   {
@@ -119,7 +123,11 @@ export const assignments: Assignment[] = [
     type: "Prueba escrita",
     points: 4,
     percentage: 20,
+<<<<<<< HEAD
     date: "2025-11-17",
+=======
+    date: "2025-11-10",
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
     color: "ghc"
   },
 
@@ -203,7 +211,11 @@ export const assignments: Assignment[] = [
     type: "Prueba",
     points: 3,
     percentage: 15,
+<<<<<<< HEAD
     date: "2025-10-25",
+=======
+    date: "2025-10-23",
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
     color: "castellano"
   },
   {
@@ -213,7 +225,11 @@ export const assignments: Assignment[] = [
     type: "Cuestionario (cuadro comparativo)",
     points: 4,
     percentage: 20,
+<<<<<<< HEAD
     date: "2025-11-05",
+=======
+    date: "2025-11-10",
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
     color: "castellano"
   },
   {
@@ -223,7 +239,11 @@ export const assignments: Assignment[] = [
     type: "Mapa Mental",
     points: 2,
     percentage: 10,
+<<<<<<< HEAD
     date: "2025-11-12",
+=======
+    date: "2025-11-17",
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
     color: "castellano"
   },
   {
@@ -233,7 +253,11 @@ export const assignments: Assignment[] = [
     type: "Compresión lectora \"Zeus\"",
     points: 4,
     percentage: 20,
+<<<<<<< HEAD
     date: "2025-11-28",
+=======
+    date: "2025-11-24",
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
     color: "castellano"
   },
   {
@@ -324,7 +348,11 @@ export const assignments: Assignment[] = [
   {
     id: "mat-3",
     subject: "Matemáticas",
+<<<<<<< HEAD
     content: "Trigonometría",
+=======
+    content: "Tema 3",
+>>>>>>> 806ce752b2ffd01196fc27e4e10850998b243736
     type: "Taller #2",
     points: 4,
     percentage: 20,
