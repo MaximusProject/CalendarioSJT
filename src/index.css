@@ -47,6 +47,8 @@ All colors MUST be HSL.
     --matematicas: 199 89% 48%;
     --finanzas: 142 71% 45%;
     --ingles: 262 52% 47%;
+    --educacion-fisica: 45 93% 47%;
+    --fisica: 280 61% 50%;
 
     /* Design tokens */
     --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
@@ -101,6 +103,8 @@ All colors MUST be HSL.
     --matematicas: 199 84% 55%;
     --finanzas: 142 65% 52%;
     --ingles: 262 47% 55%;
+    --educacion-fisica: 45 88% 55%;
+    --fisica: 280 56% 58%;
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;

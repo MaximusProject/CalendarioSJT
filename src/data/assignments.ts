@@ -16,7 +16,7 @@ export const assignments: Assignment[] = [
   {
     id: "bio-1",
     subject: "Biología",
-    content: "Orígen de la vida hipótesis del origen",
+    content: "Orígen de la vida hipótesis del orígen",
     type: "Escala de estimación",
     technique: "Procesador de información (Mapa mixto)",
     points: 4,
@@ -230,7 +230,7 @@ export const assignments: Assignment[] = [
     id: "cast-5",
     subject: "Castellano",
     content: "Análisis Literario",
-    type: "Comprensión lectora \"Zeus\"",
+    type: "Compresión lectora \"Zeus\"",
     points: 4,
     percentage: 20,
     date: "2025-11-28",
@@ -434,5 +434,109 @@ export const assignments: Assignment[] = [
     percentage: 20,
     date: "2025-11-21",
     color: "ingles"
+  },
+
+  // Educación física
+  {
+    id: "edfis-1",
+    subject: "Educación física",
+    content: "Potencia aeróbica y anaeróbica",
+    type: "Mapa mixto (Trabajo escrito)",
+    points: 4,
+    percentage: 20,
+    date: "2025-10-09",
+    color: "educacion-fisica"
+  },
+  {
+    id: "edfis-2",
+    subject: "Educación física",
+    content: "Atletismo y sus cualidades",
+    type: "Prueba escrita",
+    points: 4,
+    percentage: 20,
+    date: "2025-10-16",
+    color: "educacion-fisica"
+  },
+  {
+    id: "edfis-3",
+    subject: "Educación física",
+    content: "Capacidad aeróbica",
+    type: "Prueba práctica",
+    points: 3,
+    percentage: 15,
+    date: "2025-10-30",
+    color: "educacion-fisica"
+  },
+  {
+    id: "edfis-4",
+    subject: "Educación física",
+    content: "Capacidad Anaeróbica",
+    type: "Prueba práctica",
+    points: 3,
+    percentage: 15,
+    date: "2025-11-06",
+    color: "educacion-fisica"
+  },
+  {
+    id: "edfis-5",
+    subject: "Educación física",
+    content: "Participación en prueba de atletismo",
+    type: "Participacion",
+    points: 4,
+    percentage: 20,
+    date: "2025-11-20",
+    color: "educacion-fisica"
+  },
+
+  // Física
+  {
+    id: "fis-1",
+    subject: "Física",
+    content: "Evaluación #1",
+    type: "Taller",
+    points: 3,
+    percentage: 15,
+    date: "2025-10-07",
+    color: "fisica"
+  },
+  {
+    id: "fis-2",
+    subject: "Física",
+    content: "Evaluación #2",
+    type: "Prueba P",
+    points: 4,
+    percentage: 20,
+    date: "2025-10-15",
+    color: "fisica"
+  },
+  {
+    id: "fis-3",
+    subject: "Física",
+    content: "Evaluación #3",
+    type: "Laboratorio",
+    points: 4,
+    percentage: 20,
+    date: "2025-10-29",
+    color: "fisica"
+  },
+  {
+    id: "fis-4",
+    subject: "Física",
+    content: "Evaluación #4",
+    type: "Dinámica",
+    points: 3,
+    percentage: 15,
+    date: "2025-11-12",
+    color: "fisica"
+  },
+  {
+    id: "fis-5",
+    subject: "Física",
+    content: "Evaluación #5",
+    type: "Prueba P",
+    points: 4,
+    percentage: 20,
+    date: "2025-11-26",
+    color: "fisica"
   },
 ];
