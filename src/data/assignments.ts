@@ -203,7 +203,7 @@ export const assignments: Assignment[] = [
     type: "Prueba",
     points: 3,
     percentage: 15,
-    date: "2025-10-25",
+    date: "2025-10-17",
     color: "castellano"
   },
   {
@@ -261,6 +261,16 @@ export const assignments: Assignment[] = [
   },
   {
     id: "quim-2",
+    subject: "Química",
+    content: "Nomenclatura tradicional y de stock",
+    type: "Guía de ejercicios",
+    points: 4,
+    percentage: 20,
+    date: "2025-10-21",
+    color: "quimica"
+  },
+  {
+    id: "quim-2b",
     subject: "Química",
     content: "Nomenclatura de compuestos inorgánicos (Ácidos y Sales)",
     type: "Prueba (todo lo visto anteriormente)",
