@@ -8,8 +8,12 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
-  base: "/CalendarioSJT/",
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  // Esto asegura que al hacer "npm run build", las rutas sean relativas al repo
+  base: mode === "production" ? "/CalendarioSJT/" : "/",
+  plugins: [
+    react(), 
+    mode === "development" && componentTagger()
+  ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

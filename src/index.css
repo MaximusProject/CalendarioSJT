@@ -2,60 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 240 20% 99%;
+    --background: 0 0% 98%;
     --foreground: 240 10% 10%;
-
     --card: 0 0% 100%;
     --card-foreground: 240 10% 10%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 10%;
-
-    --primary: 243 75% 59%;
+    --primary: 250 85% 60%;
     --primary-foreground: 0 0% 100%;
-
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 240 10% 10%;
-
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
-
-    --accent: 243 75% 59%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 84% 60%;
+    --secondary: 240 5% 94%;
+    --secondary-foreground: 240 10% 20%;
+    --muted: 240 5% 94%;
+    --muted-foreground: 240 5% 50%;
+    --accent: 250 85% 95%;
+    --accent-foreground: 250 85% 40%;
+    --destructive: 0 85% 60%;
     --destructive-foreground: 0 0% 100%;
-
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 243 75% 59%;
-
+    --border: 240 5% 88%;
+    --input: 240 5% 88%;
+    --ring: 250 85% 60%;
     --radius: 0.75rem;
-
-    /* Subject-specific colors */
-    --biology: 142 76% 36%;
-    --ghc: 25 95% 53%;
-    --soberania: 221 83% 53%;
-    --castellano: 340 82% 52%;
-    --quimica: 271 81% 56%;
-    --matematicas: 199 89% 48%;
-    --finanzas: 142 71% 45%;
-    --ingles: 262 52% 47%;
-    --educacion-fisica: 45 93% 47%;
-    --fisica: 280 61% 50%;
-
-    /* Design tokens */
-    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
-    --shadow-hover: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -4px hsl(0 0% 0% / 0.1);
-    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-
-    --sidebar-background: 0 0% 98%;
+    
+    /* Subject colors - vibrant palette */
+    --biology: 142 70% 45%;
+    --ghc: 32 95% 50%;
+    --soberania: 200 95% 45%;
+    --castellano: 280 70% 55%;
+    --quimica: 350 85% 55%;
+    --matematicas: 220 85% 55%;
+    --finanzas: 160 60% 45%;
+    --ingles: 45 95% 50%;
+    --fisica: 190 80% 45%;
+    --educacion-fisica: 340 75% 55%;
+    --robotica: 175 70% 40%;
+    --fe: 270 60% 60%;
+    --frances: 230 70% 55%;
+    
+    --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
@@ -66,46 +51,41 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 240 10% 8%;
-    --foreground: 240 5% 96%;
-
-    --card: 240 10% 12%;
-    --card-foreground: 240 5% 96%;
-
-    --popover: 240 10% 12%;
-    --popover-foreground: 240 5% 96%;
-
-    --primary: 243 75% 59%;
+    --background: 240 10% 6%;
+    --foreground: 0 0% 95%;
+    --card: 240 10% 8%;
+    --card-foreground: 0 0% 95%;
+    --popover: 240 10% 8%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 250 85% 65%;
     --primary-foreground: 0 0% 100%;
-
-    --secondary: 240 4% 16%;
-    --secondary-foreground: 240 5% 96%;
-
-    --muted: 240 4% 16%;
-    --muted-foreground: 240 5% 64%;
-
-    --accent: 243 75% 59%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 63% 31%;
+    --secondary: 240 5% 18%;
+    --secondary-foreground: 0 0% 90%;
+    --muted: 240 5% 18%;
+    --muted-foreground: 240 5% 60%;
+    --accent: 250 30% 20%;
+    --accent-foreground: 250 85% 80%;
+    --destructive: 0 75% 50%;
     --destructive-foreground: 0 0% 100%;
-
-    --border: 240 4% 16%;
-    --input: 240 4% 16%;
-    --ring: 243 75% 59%;
-
-    /* Subject-specific colors (slightly adjusted for dark mode) */
-    --biology: 142 70% 45%;
-    --ghc: 25 90% 60%;
-    --soberania: 221 78% 60%;
-    --castellano: 340 75% 60%;
-    --quimica: 271 75% 63%;
-    --matematicas: 199 84% 55%;
-    --finanzas: 142 65% 52%;
-    --ingles: 262 47% 55%;
-    --educacion-fisica: 45 88% 55%;
-    --fisica: 280 56% 58%;
-
+    --border: 240 5% 20%;
+    --input: 240 5% 20%;
+    --ring: 250 85% 65%;
+    
+    /* Subject colors - dark mode vibrant */
+    --biology: 142 60% 50%;
+    --ghc: 32 85% 55%;
+    --soberania: 200 85% 50%;
+    --castellano: 280 60% 60%;
+    --quimica: 350 75% 60%;
+    --matematicas: 220 75% 60%;
+    --finanzas: 160 50% 50%;
+    --ingles: 45 85% 55%;
+    --fisica: 190 70% 50%;
+    --educacion-fisica: 340 65% 60%;
+    --robotica: 175 60% 50%;
+    --fe: 270 50% 65%;
+    --frances: 230 60% 60%;
+    
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -123,6 +103,67 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.2s ease-out;
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-105;
+  }
+
+  .glass {
+    @apply bg-background/80 backdrop-blur-lg;
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
 }
