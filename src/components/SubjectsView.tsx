@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
-import { assignments, Assignment } from "@/data/assignments";
+import { assignments as assignmentsSectionB, Assignment } from "@/data/assignments";
+import { assignmentsSectionA } from "@/data/assignmentsSectionA";
 import { ChevronRight, BookOpen, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 import { AssignmentCard } from "./AssignmentCard";
@@ -7,9 +8,15 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useSettings } from "@/hooks/useSettings";
 
-export function SubjectsView() {
+interface SubjectsViewProps {
+  section: "A" | "B";
+}
+
+export function SubjectsView({ section }: SubjectsViewProps) {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const { isCompleted, isSubjectHidden, getCustomDate } = useSettings();
+
+  const assignments = section === "A" ? assignmentsSectionA : assignmentsSectionB;
 
   // Filter hidden subjects and group assignments
   const filteredAssignments = assignments.filter(a => !isSubjectHidden(a.subject));

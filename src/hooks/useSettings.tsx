@@ -8,6 +8,7 @@ export interface Settings {
   completedAssignments: string[];
   assignmentNotes: Record<string, string>;
   customDates: Record<string, string>; // assignmentId -> new date
+  selectedSection: 'A' | 'B' | null;
 }
 
 const defaultSettings: Settings = {
@@ -17,6 +18,7 @@ const defaultSettings: Settings = {
   completedAssignments: [],
   assignmentNotes: {},
   customDates: {},
+  selectedSection: null,
 };
 
 interface SettingsContextType {
@@ -31,6 +33,8 @@ interface SettingsContextType {
   toggleHiddenSubject: (subject: string) => void;
   isSubjectHidden: (subject: string) => boolean;
   resetSettings: () => void;
+  setSection: (section: 'A' | 'B') => void;
+  clearSection: () => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | null>(null);
@@ -106,6 +110,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     setSettings(defaultSettings);
   };
 
+  const setSection = (section: 'A' | 'B') => {
+    setSettings(prev => ({ ...prev, selectedSection: section }));
+  };
+
+  const clearSection = () => {
+    setSettings(prev => ({ ...prev, selectedSection: null }));
+  };
+
   return (
     <SettingsContext.Provider value={{
       settings,
@@ -119,6 +131,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       toggleHiddenSubject,
       isSubjectHidden,
       resetSettings,
+      setSection,
+      clearSection,
     }}>
       {children}
     </SettingsContext.Provider>

@@ -6,11 +6,17 @@ import { PinDialog } from "@/components/PinDialog";
 import { SubjectsView } from "@/components/SubjectsView";
 import { UndatedSubjectsView } from "@/components/UndatedSubjectsView";
 import { SettingsDialog } from "@/components/SettingsDialog";
+import { SectionPicker } from "@/components/SectionPicker";
+import { ColorLegend } from "@/components/ColorLegend";
+import { ExportPDF } from "@/components/ExportPDF";
+import { BlogSection } from "@/components/BlogSection";
 import { Assignment } from "@/data/assignments";
-import { BookOpen, Lock, LogOut, Calendar as CalendarIcon, GraduationCap, Clock, Sparkles } from "lucide-react";
+import { Lock, LogOut, Calendar as CalendarIcon, GraduationCap, Clock, Sparkles, Newspaper, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePinAuth } from "@/hooks/usePinAuth";
+import { useSettings } from "@/hooks/useSettings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
 const Index = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -18,12 +24,18 @@ const Index = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pinDialogOpen, setPinDialogOpen] = useState(false);
   const { isAuthenticated, logout } = usePinAuth();
+  const { settings, setSection, clearSection } = useSettings();
 
   const handleDayClick = (date: Date, assignments: Assignment[]) => {
     setSelectedDate(date);
     setSelectedAssignments(assignments);
     setDialogOpen(true);
   };
+
+  // If no section is selected, show the section picker
+  if (!settings.selectedSection) {
+    return <SectionPicker onSelectSection={setSection} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20">
@@ -36,15 +48,35 @@ const Index = () => {
                 <Sparkles className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
-                  Mi Calendario
-                </h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+                    Mi Calendario
+                  </h1>
+                  <Badge 
+                    variant="secondary" 
+                    className={`text-xs ${settings.selectedSection === 'A' ? 'bg-blue-500/20 text-blue-600' : 'bg-emerald-500/20 text-emerald-600'}`}
+                  >
+                    Sección {settings.selectedSection}
+                  </Badge>
+                </div>
                 <p className="text-xs md:text-sm text-muted-foreground hidden sm:block">
                   Organiza tus evaluaciones
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 md:gap-2">
+              <ExportPDF section={settings.selectedSection} />
+              <ColorLegend />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearSection}
+                className="gap-2"
+                title="Cambiar sección"
+              >
+                <ArrowLeftRight className="h-4 w-4" />
+                <span className="hidden lg:inline">Cambiar</span>
+              </Button>
               <SettingsDialog />
               {isAuthenticated ? (
                 <Button
@@ -75,7 +107,7 @@ const Index = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6 md:py-8">
         <Tabs defaultValue="calendar" className="space-y-6">
-          <TabsList className="grid w-full max-w-lg mx-auto grid-cols-3 p-1 bg-muted/50 backdrop-blur-sm">
+          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4 p-1 bg-muted/50 backdrop-blur-sm">
             <TabsTrigger value="calendar" className="gap-1.5 md:gap-2 text-xs md:text-sm">
               <CalendarIcon className="h-3.5 w-3.5 md:h-4 md:w-4" />
               <span className="hidden sm:inline">Calendario</span>
@@ -91,25 +123,34 @@ const Index = () => {
               <span className="hidden sm:inline">Sin fecha</span>
               <span className="sm:hidden">S/F</span>
             </TabsTrigger>
+            <TabsTrigger value="blog" className="gap-1.5 md:gap-2 text-xs md:text-sm">
+              <Newspaper className="h-3.5 w-3.5 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">Blog</span>
+              <span className="sm:hidden">Blog</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="calendar" className="animate-fade-in">
             <div className="grid gap-6 lg:grid-cols-3">
-              <div className="lg:col-span-2">
-                <Calendar onDayClick={handleDayClick} />
+              <div className="lg:col-span-2" data-calendar-export>
+                <Calendar onDayClick={handleDayClick} section={settings.selectedSection} />
               </div>
               <div>
-                <NextWeekSection />
+                <NextWeekSection section={settings.selectedSection} />
               </div>
             </div>
           </TabsContent>
 
           <TabsContent value="subjects" className="animate-fade-in">
-            <SubjectsView />
+            <SubjectsView section={settings.selectedSection} />
           </TabsContent>
 
           <TabsContent value="undated" className="animate-fade-in">
-            <UndatedSubjectsView />
+            <UndatedSubjectsView section={settings.selectedSection} />
+          </TabsContent>
+
+          <TabsContent value="blog" className="animate-fade-in">
+            <BlogSection />
           </TabsContent>
         </Tabs>
       </main>
@@ -117,7 +158,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t bg-card/50 mt-auto py-4">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>Calendario Académico 2026 • Haz clic en cualquier evaluación para editarla</p>
+          <p>Calendario Académico 2026 - Sección {settings.selectedSection} • Haz clic en cualquier evaluación para editarla</p>
         </div>
       </footer>
 

@@ -3,7 +3,8 @@ import { ChevronLeft, ChevronRight, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { assignments, Assignment } from "@/data/assignments";
+import { assignments as assignmentsSectionB, Assignment } from "@/data/assignments";
+import { assignmentsSectionA } from "@/data/assignmentsSectionA";
 import { usePinAuth } from "@/hooks/usePinAuth";
 import { useSettings } from "@/hooks/useSettings";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, isToday, isBefore, startOfDay } from "date-fns";
@@ -11,13 +12,16 @@ import { es } from "date-fns/locale";
 
 interface CalendarProps {
   onDayClick: (date: Date, assignments: Assignment[]) => void;
+  section: "A" | "B";
 }
 
-export function Calendar({ onDayClick }: CalendarProps) {
+export function Calendar({ onDayClick, section }: CalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [daysWithComments, setDaysWithComments] = useState<Set<string>>(new Set());
   const { isAuthenticated } = usePinAuth();
   const { isSubjectHidden, getCustomDate, isCompleted } = useSettings();
+
+  const assignments = section === "A" ? assignmentsSectionA : assignmentsSectionB;
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);

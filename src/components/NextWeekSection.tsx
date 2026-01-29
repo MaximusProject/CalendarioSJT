@@ -1,14 +1,21 @@
-import { assignments } from "@/data/assignments";
+import { assignments as assignmentsSectionB } from "@/data/assignments";
+import { assignmentsSectionA } from "@/data/assignmentsSectionA";
 import { AssignmentCard } from "./AssignmentCard";
 import { Card } from "@/components/ui/card";
 import { CalendarDays, Sparkles } from "lucide-react";
 import { addDays, isWithinInterval, startOfDay } from "date-fns";
 import { useSettings } from "@/hooks/useSettings";
 
-export function NextWeekSection() {
+interface NextWeekSectionProps {
+  section: "A" | "B";
+}
+
+export function NextWeekSection({ section }: NextWeekSectionProps) {
   const { isSubjectHidden, getCustomDate } = useSettings();
   const today = startOfDay(new Date());
   const nextWeek = addDays(today, 7);
+
+  const assignments = section === "A" ? assignmentsSectionA : assignmentsSectionB;
 
   const upcomingAssignments = assignments
     .filter(assignment => {
