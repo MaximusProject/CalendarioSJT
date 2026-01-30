@@ -11,11 +11,14 @@ import {
   Image as ImageIcon, 
   Link as LinkIcon, 
   Trash2, 
-  Calendar,
   ExternalLink,
   Edit2,
   X,
-  Save
+  Save,
+  Heart,
+  MessageCircle,
+  Share2,
+  MoreHorizontal
 } from "lucide-react";
 import {
   Dialog,
@@ -24,8 +27,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface BlogPost {
   id: string;
@@ -36,9 +46,14 @@ interface BlogPost {
   createdAt: string;
 }
 
-export function BlogSection() {
+interface BlogSectionProps {
+  section: "A" | "B";
+}
+
+export function BlogSection({ section }: BlogSectionProps) {
   const { isAuthenticated } = usePinAuth();
-  const [posts, setPosts] = useLocalStorage<BlogPost[]>("blog-posts", []);
+  // Posts are stored separately per section
+  const [posts, setPosts] = useLocalStorage<BlogPost[]>(`blog-posts-section-${section}`, []);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   
@@ -110,74 +125,94 @@ export function BlogSection() {
     setPosts(posts.filter(p => p.id !== id));
   };
 
+  // Convert Imgur album URL to direct image URL
+  const getImageUrl = (url: string) => {
+    if (url.includes('imgur.com/a/')) {
+      // For albums, try to get the first image
+      const albumId = url.split('/a/')[1]?.split('/')[0]?.split('?')[0];
+      if (albumId) {
+        return `https://i.imgur.com/${albumId}.jpg`;
+      }
+    }
+    // Direct image URLs
+    if (url.includes('imgur.com') && !url.includes('i.imgur.com')) {
+      const imageId = url.split('/').pop()?.split('.')[0];
+      if (imageId) {
+        return `https://i.imgur.com/${imageId}.jpg`;
+      }
+    }
+    return url;
+  };
+
   return (
     <div className="space-y-6">
+      {/* Instagram-style header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            📰 Blog / Anuncios
-          </h2>
-          <p className="text-muted-foreground">
-            Publicaciones y anuncios importantes
+          <h2 className="text-2xl font-bold">Anuncios</h2>
+          <p className="text-sm text-muted-foreground">
+            Secci&oacute;n {section} &bull; {posts.length} publicaciones
           </p>
         </div>
         
         {isAuthenticated && (
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button onClick={() => handleOpenDialog()} className="gap-2">
+              <Button onClick={() => handleOpenDialog()} className="gap-2 rounded-full h-10">
                 <Plus className="h-4 w-4" />
-                Nueva publicación
+                Nuevo
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl">
               <DialogHeader>
                 <DialogTitle>
-                  {editingPost ? "Editar publicación" : "Nueva publicación"}
+                  {editingPost ? "Editar publicaci\u00F3n" : "Nueva publicaci\u00F3n"}
                 </DialogTitle>
               </DialogHeader>
               
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Título</Label>
+                  <Label htmlFor="title">T&iacute;tulo</Label>
                   <Input
                     id="title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Título de la publicación"
+                    placeholder="T&iacute;tulo de la publicaci&oacute;n"
+                    className="rounded-xl"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="content">Contenido</Label>
+                  <Label htmlFor="content">Descripci&oacute;n</Label>
                   <Textarea
                     id="content"
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
-                    placeholder="Escribe el contenido de tu publicación..."
-                    className="min-h-[150px]"
+                    placeholder="Escribe tu mensaje..."
+                    className="min-h-[100px] rounded-xl resize-none"
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="imageUrl" className="flex items-center gap-2">
                     <ImageIcon className="h-4 w-4" />
-                    URL de imagen (Imgur u otro servicio)
+                    URL de imagen (Imgur)
                   </Label>
                   <Input
                     id="imageUrl"
                     value={imageUrl}
                     onChange={(e) => setImageUrl(e.target.value)}
-                    placeholder="https://i.imgur.com/ejemplo.jpg"
+                    placeholder="https://imgur.com/a/ejemplo"
+                    className="rounded-xl"
                   />
                   {imageUrl && (
-                    <div className="mt-2 rounded-lg overflow-hidden border">
+                    <div className="mt-2 rounded-xl overflow-hidden border aspect-video bg-muted">
                       <img 
-                        src={imageUrl} 
+                        src={getImageUrl(imageUrl)} 
                         alt="Preview" 
-                        className="w-full h-48 object-cover"
+                        className="w-full h-full object-cover"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).src = '/placeholder.svg';
                         }}
                       />
                     </div>
@@ -191,13 +226,13 @@ export function BlogSection() {
                   </Label>
                   
                   {links.map((link, index) => (
-                    <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
-                      <span className="flex-1 text-sm truncate">{link.label}: {link.url}</span>
+                    <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-xl">
+                      <span className="flex-1 text-sm truncate">{link.label}</span>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => handleRemoveLink(index)}
-                        className="h-8 w-8"
+                        className="h-8 w-8 rounded-full"
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -209,25 +244,26 @@ export function BlogSection() {
                       value={newLinkLabel}
                       onChange={(e) => setNewLinkLabel(e.target.value)}
                       placeholder="Etiqueta"
-                      className="flex-1"
+                      className="flex-1 rounded-xl"
                     />
                     <Input
                       value={newLinkUrl}
                       onChange={(e) => setNewLinkUrl(e.target.value)}
-                      placeholder="https://..."
-                      className="flex-1"
+                      placeholder="URL"
+                      className="flex-1 rounded-xl"
                     />
                     <Button
                       variant="outline"
                       onClick={handleAddLink}
                       disabled={!newLinkLabel || !newLinkUrl}
+                      className="rounded-xl"
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
 
-                <Button onClick={handleSubmit} className="w-full gap-2">
+                <Button onClick={handleSubmit} className="w-full gap-2 h-12 rounded-xl">
                   <Save className="h-4 w-4" />
                   {editingPost ? "Guardar cambios" : "Publicar"}
                 </Button>
@@ -238,61 +274,90 @@ export function BlogSection() {
       </div>
 
       {posts.length === 0 ? (
-        <Card className="p-8 text-center">
-          <p className="text-muted-foreground">
-            No hay publicaciones aún
+        <Card className="p-12 text-center rounded-2xl">
+          <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center mb-4">
+            <ImageIcon className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold mb-1">Sin publicaciones</h3>
+          <p className="text-muted-foreground text-sm">
+            Las publicaciones de la Secci&oacute;n {section} aparecer&aacute;n aqu&iacute;
           </p>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-4">
           {posts.map((post) => (
-            <Card key={post.id} className="overflow-hidden">
+            <Card key={post.id} className="overflow-hidden rounded-2xl border-none shadow-lg">
+              {/* Post Header - Instagram style */}
+              <div className="flex items-center justify-between p-4">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10 border-2 border-primary">
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground font-bold">
+                      {section}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-semibold text-sm">Secci&oacute;n {section}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(post.createdAt), "d MMM yyyy", { locale: es })}
+                    </p>
+                  </div>
+                </div>
+                
+                {isAuthenticated && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                        <MoreHorizontal className="h-5 w-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="rounded-xl">
+                      <DropdownMenuItem onClick={() => handleOpenDialog(post)} className="gap-2">
+                        <Edit2 className="h-4 w-4" />
+                        Editar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => handleDelete(post.id)} 
+                        className="gap-2 text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Eliminar
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              </div>
+
+              {/* Image */}
               {post.imageUrl && (
-                <div className="aspect-video overflow-hidden">
+                <div className="aspect-video bg-muted">
                   <img
-                    src={post.imageUrl}
+                    src={getImageUrl(post.imageUrl)}
                     alt={post.title}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).src = '/placeholder.svg';
                     }}
                   />
                 </div>
               )}
-              <div className="p-4 space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-semibold text-lg">{post.title}</h3>
-                  {isAuthenticated && (
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleOpenDialog(post)}
-                        className="h-8 w-8"
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(post.id)}
-                        className="h-8 w-8 text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-                
-                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                  <Calendar className="h-3 w-3" />
-                  {format(new Date(post.createdAt), "d 'de' MMMM, yyyy", { locale: es })}
+
+              {/* Actions - Instagram style */}
+              <div className="flex items-center gap-4 p-4 pb-2">
+                <Heart className="h-6 w-6 cursor-pointer hover:text-destructive transition-colors" />
+                <MessageCircle className="h-6 w-6 cursor-pointer hover:text-primary transition-colors" />
+                <Share2 className="h-6 w-6 cursor-pointer hover:text-primary transition-colors" />
+              </div>
+
+              {/* Content */}
+              <div className="px-4 pb-4 space-y-2">
+                <p className="text-sm">
+                  <span className="font-semibold">{post.title}</span>
+                  {" "}
+                  <span className="text-muted-foreground">{post.content}</span>
                 </p>
                 
-                <p className="text-sm whitespace-pre-wrap">{post.content}</p>
-                
                 {post.links && post.links.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-2">
+                  <div className="flex flex-wrap gap-2 pt-1">
                     {post.links.map((link, index) => (
                       <a
                         key={index}

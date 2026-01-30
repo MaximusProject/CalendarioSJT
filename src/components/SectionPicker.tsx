@@ -1,6 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { GraduationCap, Sparkles, Users, ChevronRight } from "lucide-react";
+import { Sparkles, ChevronRight, Calendar } from "lucide-react";
 
 interface SectionPickerProps {
   onSelectSection: (section: "A" | "B") => void;
@@ -8,82 +7,82 @@ interface SectionPickerProps {
 
 export function SectionPicker({ onSelectSection }: SectionPickerProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/20 flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full space-y-8 animate-fade-in">
-        {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/30 flex items-center justify-center p-4">
+      <div className="max-w-md w-full space-y-8 animate-fade-in">
+        {/* Logo y Título */}
         <div className="text-center space-y-4">
-          <div className="flex items-center justify-center">
-            <div className="flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary/70 shadow-xl">
-              <Sparkles className="h-10 w-10 text-primary-foreground" />
+          <div className="flex justify-center">
+            <div className="relative">
+              <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary via-primary to-primary/80 flex items-center justify-center shadow-2xl shadow-primary/30">
+                <Calendar className="h-10 w-10 text-primary-foreground" />
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center border-4 border-background">
+                <Sparkles className="h-4 w-4 text-white" />
+              </div>
             </div>
           </div>
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
-              隆Bienvenido! 馃憢
+          
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground via-foreground to-muted-foreground bg-clip-text">
+              &iexcl;Bienvenido! &#128075;
             </h1>
-            <p className="text-lg text-muted-foreground mt-2">
-              Calendario Acad茅mico 2026
+            <p className="text-lg font-medium text-primary">
+              Calendario Acad&eacute;mico 2026
+            </p>
+            <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+              Selecciona tu secci&oacute;n para comenzar
             </p>
           </div>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            Selecciona tu secci贸n para ver el calendario de evaluaciones correspondiente
-          </p>
         </div>
 
-        {/* Section Cards */}
-        <div className="grid gap-4 md:grid-cols-2">
+        {/* Tarjetas de Sección */}
+        <div className="space-y-3">
           <Card
-            className="p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-[1.02] border-2 hover:border-primary/50 group"
+            className="relative overflow-hidden cursor-pointer group rounded-2xl border-2 border-transparent hover:border-blue-500/50 transition-all duration-300 active:scale-[0.98]"
             onClick={() => onSelectSection("A")}
           >
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                <span className="text-3xl font-bold text-white">A</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="p-5 flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+                <span className="text-2xl font-bold text-white">A</span>
               </div>
-              <div>
-                <h2 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">
-                  Secci贸n A
+              <div className="flex-1">
+                <h2 className="text-lg font-bold group-hover:text-blue-500 transition-colors">
+                  Secci&oacute;n A
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Plan de evaluaciones para la Secci贸n A
+                  Ver evaluaciones de la Secci&oacute;n A
                 </p>
               </div>
-              <Button variant="outline" className="w-full gap-2 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                <Users className="h-4 w-4" />
-                Entrar
-                <ChevronRight className="h-4 w-4 ml-auto" />
-              </Button>
+              <ChevronRight className="h-6 w-6 text-muted-foreground group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
             </div>
           </Card>
 
           <Card
-            className="p-6 cursor-pointer hover:shadow-xl transition-all hover:scale-[1.02] border-2 hover:border-primary/50 group"
+            className="relative overflow-hidden cursor-pointer group rounded-2xl border-2 border-transparent hover:border-emerald-500/50 transition-all duration-300 active:scale-[0.98]"
             onClick={() => onSelectSection("B")}
           >
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                <span className="text-3xl font-bold text-white">B</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="p-5 flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+                <span className="text-2xl font-bold text-white">B</span>
               </div>
-              <div>
-                <h2 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">
-                  Secci贸n B
+              <div className="flex-1">
+                <h2 className="text-lg font-bold group-hover:text-emerald-500 transition-colors">
+                  Secci&oacute;n B
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Plan de evaluaciones para la Secci贸n B
+                  Ver evaluaciones de la Secci&oacute;n B
                 </p>
               </div>
-              <Button variant="outline" className="w-full gap-2 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                <Users className="h-4 w-4" />
-                Entrar
-                <ChevronRight className="h-4 w-4 ml-auto" />
-              </Button>
+              <ChevronRight className="h-6 w-6 text-muted-foreground group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
             </div>
           </Card>
         </div>
 
-        {/* Footer Note */}
+        {/* Nota al pie */}
         <p className="text-center text-xs text-muted-foreground">
-          Puedes cambiar de secci贸n en cualquier momento desde la configuraci贸n
+          Puedes cambiar de secci&oacute;n desde el men&uacute; principal
         </p>
       </div>
     </div>
