@@ -6,6 +6,7 @@ import { PinDialog } from "@/components/PinDialog";
 import { SubjectsView } from "@/components/SubjectsView";
 import { UndatedSubjectsView } from "@/components/UndatedSubjectsView";
 import { GradeCalculator } from "@/components/GradeCalculator";
+import { MiniProjects } from "@/components/MiniProjects";
 import { SettingsDialog } from "@/components/SettingsDialog";
 import { SectionPicker } from "@/components/SectionPicker";
 import { ColorLegend } from "@/components/ColorLegend";
@@ -15,20 +16,20 @@ import { Assignment } from "@/data/assignments";
 import { 
   Lock, 
   LogOut, 
-  Calendar as CalendarIcon, 
   GraduationCap, 
   Clock, 
   Newspaper, 
   ArrowLeftRight,
   Calculator,
-  Home
+  Home,
+  Beaker
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePinAuth } from "@/hooks/usePinAuth";
 import { useSettings } from "@/hooks/useSettings";
 import { cn } from "@/lib/utils";
 
-type TabType = "home" | "subjects" | "undated" | "calculator" | "blog";
+type TabType = "home" | "subjects" | "undated" | "calculator" | "projects" | "blog";
 
 const Index = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -53,8 +54,8 @@ const Index = () => {
   const tabs = [
     { id: "home" as TabType, icon: Home, label: "Inicio" },
     { id: "subjects" as TabType, icon: GraduationCap, label: "Materias" },
-    { id: "undated" as TabType, icon: Clock, label: "Sin fecha" },
     { id: "calculator" as TabType, icon: Calculator, label: "Notas" },
+    { id: "projects" as TabType, icon: Beaker, label: "Herramientas" },
     { id: "blog" as TabType, icon: Newspaper, label: "Blog" },
   ];
 
@@ -131,9 +132,9 @@ const Index = () => {
           </div>
         )}
 
-        {activeTab === "undated" && (
+        {activeTab === "projects" && (
           <div className="animate-fade-in">
-            <UndatedSubjectsView section={settings.selectedSection} />
+            <MiniProjects section={settings.selectedSection} />
           </div>
         )}
 

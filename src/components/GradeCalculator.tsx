@@ -1,15 +1,15 @@
 import { useState, useMemo } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Calculator, ChevronRight, RotateCcw, TrendingUp } from "lucide-react";
+import { Calculator, ChevronRight, RotateCcw, TrendingUp, Plus, Minus, BookOpen, Star } from "lucide-react";
 import { assignments as assignmentsSectionB, undatedAssignments as undatedSectionB } from "@/data/assignments";
 import { assignmentsSectionA, undatedAssignmentsSectionA } from "@/data/assignmentsSectionA";
 import { useSettings } from "@/hooks/useSettings";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { cn } from "@/lib/utils";
 
 interface GradeCalculatorProps {
   section: "A" | "B";
@@ -18,6 +18,22 @@ interface GradeCalculatorProps {
 interface GradeEntry {
   [assignmentId: string]: number | null;
 }
+
+// Tipos de evaluación que son acumulativos (suman puntos, no restan)
+const CUMULATIVE_TYPES = [
+  "rasgos", "cuaderno", "participación", "actitud", "personal features", 
+  "traits", "cahier", "revisión", "pastoral", "recuperación"
+];
+
+// Función para determinar si es una evaluación acumulativa
+const isCumulative = (content: string, type?: string): boolean => {
+  const lowerContent = content.toLowerCase();
+  const lowerType = type?.toLowerCase() || "";
+  
+  return CUMULATIVE_TYPES.some(t => 
+    lowerContent.includes(t) || lowerType.includes(t)
+  );
+};
 
 export function GradeCalculator({ section }: GradeCalculatorProps) {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
@@ -42,21 +58,61 @@ export function GradeCalculator({ section }: GradeCalculatorProps) {
 
   const subjects = Object.keys(subjectGroups).sort();
 
-  const calculateSubjectAverage = (subject: string) => {
+  const calculateSubjectGrade = (subject: string) => {
     const subjectAssignments = subjectGroups[subject];
-    let totalWeightedGrade = 0;
-    let totalWeight = 0;
+    let formalGradeSum = 0;
+    let formalWeightSum = 0;
+    let cumulativePoints = 0;
+    let maxCumulativePoints = 0;
 
     subjectAssignments.forEach((assignment) => {
       const grade = grades[assignment.id];
-      if (grade !== null && grade !== undefined) {
-        totalWeightedGrade += grade * (assignment.percentage / 100);
-        totalWeight += assignment.percentage;
+      const assignmentIsCumulative = isCumulative(assignment.content, assignment.type);
+
+      if (assignmentIsCumulative) {
+        // Componentes acumulativos: suman puntos adicionales
+        maxCumulativePoints += assignment.percentage;
+        if (grade !== null && grade !== undefined) {
+          // Convertir la nota (0-20) a puntos proporcionales
+          cumulativePoints += (grade / 20) * assignment.percentage;
+        }
+      } else {
+        // Evaluaciones formales: se promedian ponderadamente
+        if (grade !== null && grade !== undefined) {
+          formalGradeSum += grade * (assignment.percentage / 100);
+          formalWeightSum += assignment.percentage;
+        }
       }
     });
 
-    if (totalWeight === 0) return null;
-    return (totalWeightedGrade / (totalWeight / 100));
+    const totalFormalPercentage = subjectAssignments
+      .filter(a => !isCumulative(a.content, a.type))
+      .reduce((sum, a) => sum + a.percentage, 0);
+
+    if (formalWeightSum === 0 && cumulativePoints === 0) return null;
+
+    // Nota base de evaluaciones formales (sobre 20)
+    const formalGrade = formalWeightSum > 0 
+      ? (formalGradeSum / (formalWeightSum / 100))
+      : 0;
+
+    // Puntos adicionales de componentes acumulativos (convertidos a escala de 20)
+    const bonusPoints = maxCumulativePoints > 0 
+      ? (cumulativePoints / maxCumulativePoints) * (maxCumulativePoints / 100) * 20
+      : 0;
+
+    // Nota final = nota formal + bonificación (max 20)
+    const finalGrade = Math.min(20, formalGrade + bonusPoints);
+
+    return {
+      formalGrade: formalWeightSum > 0 ? formalGrade : null,
+      bonusPoints,
+      finalGrade,
+      formalWeightSum,
+      totalFormalPercentage,
+      cumulativePoints,
+      maxCumulativePoints
+    };
   };
 
   const calculateGeneralAverage = () => {
@@ -64,9 +120,9 @@ export function GradeCalculator({ section }: GradeCalculatorProps) {
     let subjectCount = 0;
 
     subjects.forEach((subject) => {
-      const avg = calculateSubjectAverage(subject);
-      if (avg !== null) {
-        totalGrades += avg;
+      const result = calculateSubjectGrade(subject);
+      if (result !== null && result.finalGrade > 0) {
+        totalGrades += result.finalGrade;
         subjectCount++;
       }
     });
@@ -86,13 +142,13 @@ export function GradeCalculator({ section }: GradeCalculatorProps) {
 
   const generalAverage = calculateGeneralAverage();
 
+  // Vista de detalle de materia
   if (selectedSubject && subjectGroups[selectedSubject]) {
     const subjectAssignments = subjectGroups[selectedSubject];
-    const subjectAverage = calculateSubjectAverage(selectedSubject);
-    const totalPercentage = subjectAssignments.reduce((sum, a) => sum + a.percentage, 0);
-    const completedPercentage = subjectAssignments.reduce((sum, a) => {
-      return grades[a.id] !== null && grades[a.id] !== undefined ? sum + a.percentage : sum;
-    }, 0);
+    const gradeResult = calculateSubjectGrade(selectedSubject);
+    
+    const formalAssignments = subjectAssignments.filter(a => !isCumulative(a.content, a.type));
+    const cumulativeAssignments = subjectAssignments.filter(a => isCumulative(a.content, a.type));
 
     return (
       <div className="space-y-4 animate-fade-in">
@@ -107,6 +163,7 @@ export function GradeCalculator({ section }: GradeCalculatorProps) {
           </Button>
         </div>
 
+        {/* Resumen de la materia */}
         <Card className="p-5 border-l-4 rounded-2xl" style={{ borderLeftColor: `hsl(var(--${subjectAssignments[0].color}))` }}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -119,60 +176,137 @@ export function GradeCalculator({ section }: GradeCalculatorProps) {
               <div>
                 <h2 className="text-xl font-bold">{selectedSubject}</h2>
                 <p className="text-sm text-muted-foreground">
-                  {completedPercentage}% de {totalPercentage}% evaluado
+                  {formalAssignments.length} formales • {cumulativeAssignments.length} acumulativos
                 </p>
               </div>
             </div>
-            {subjectAverage !== null && (
+            {gradeResult && gradeResult.finalGrade > 0 && (
               <div className="text-right">
                 <div className="text-3xl font-bold" style={{ color: `hsl(var(--${subjectAssignments[0].color}))` }}>
-                  {subjectAverage.toFixed(2)}
+                  {gradeResult.finalGrade.toFixed(2)}
                 </div>
-                <div className="text-xs text-muted-foreground">Promedio</div>
+                <div className="text-xs text-muted-foreground">Nota Final</div>
               </div>
             )}
           </div>
 
-          <div className="space-y-3">
-            {subjectAssignments.map((assignment) => (
-              <div 
-                key={assignment.id}
-                className="p-4 rounded-xl border bg-card/50"
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{assignment.content}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="secondary" className="text-xs">
-                        {assignment.percentage}%
-                      </Badge>
-                      {assignment.type && (
-                        <span className="text-xs text-muted-foreground">{assignment.type}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      min="0"
-                      max="20"
-                      step="0.5"
-                      placeholder="--"
-                      value={grades[assignment.id] ?? ""}
-                      onChange={(e) => handleGradeChange(assignment.id, e.target.value)}
-                      className="w-20 h-10 text-center text-lg font-bold rounded-xl"
-                    />
-                    <span className="text-sm text-muted-foreground">/20</span>
-                  </div>
+          {/* Desglose */}
+          {gradeResult && (
+            <div className="grid grid-cols-2 gap-3 p-3 bg-muted/50 rounded-xl mb-4">
+              <div className="text-center p-2">
+                <div className="text-lg font-bold text-foreground">
+                  {gradeResult.formalGrade !== null ? gradeResult.formalGrade.toFixed(2) : "--"}
+                </div>
+                <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                  <Minus className="h-3 w-3" /> Nota Base
                 </div>
               </div>
-            ))}
-          </div>
+              <div className="text-center p-2">
+                <div className="text-lg font-bold text-emerald-500">
+                  +{gradeResult.bonusPoints.toFixed(2)}
+                </div>
+                <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                  <Plus className="h-3 w-3" /> Bonificación
+                </div>
+              </div>
+            </div>
+          )}
         </Card>
+
+        {/* Evaluaciones Formales */}
+        {formalAssignments.length > 0 && (
+          <div className="space-y-2">
+            <h3 className="font-semibold text-sm text-muted-foreground flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              Evaluaciones Formales
+            </h3>
+            <div className="space-y-2">
+              {formalAssignments.map((assignment) => (
+                <Card 
+                  key={assignment.id}
+                  className="p-4 rounded-xl border bg-card/50"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{assignment.content}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="secondary" className="text-xs">
+                          {assignment.percentage}%
+                        </Badge>
+                        {assignment.type && (
+                          <span className="text-xs text-muted-foreground">{assignment.type}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="20"
+                        step="0.5"
+                        placeholder="--"
+                        value={grades[assignment.id] ?? ""}
+                        onChange={(e) => handleGradeChange(assignment.id, e.target.value)}
+                        className="w-20 h-10 text-center text-lg font-bold rounded-xl"
+                      />
+                      <span className="text-sm text-muted-foreground">/20</span>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Componentes Acumulativos */}
+        {cumulativeAssignments.length > 0 && (
+          <div className="space-y-2">
+            <h3 className="font-semibold text-sm text-muted-foreground flex items-center gap-2">
+              <Star className="h-4 w-4" />
+              Componentes Acumulativos <span className="text-emerald-500">(+puntos)</span>
+            </h3>
+            <div className="space-y-2">
+              {cumulativeAssignments.map((assignment) => (
+                <Card 
+                  key={assignment.id}
+                  className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{assignment.content}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge className="text-xs bg-emerald-500/20 text-emerald-600 hover:bg-emerald-500/30">
+                          +{assignment.percentage}%
+                        </Badge>
+                        {assignment.type && (
+                          <span className="text-xs text-muted-foreground">{assignment.type}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="20"
+                        step="0.5"
+                        placeholder="--"
+                        value={grades[assignment.id] ?? ""}
+                        onChange={(e) => handleGradeChange(assignment.id, e.target.value)}
+                        className="w-20 h-10 text-center text-lg font-bold rounded-xl border-emerald-500/30 focus:ring-emerald-500"
+                      />
+                      <span className="text-sm text-muted-foreground">/20</span>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     );
   }
 
+  // Vista general de materias
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -182,7 +316,7 @@ export function GradeCalculator({ section }: GradeCalculatorProps) {
             Calculadora de Notas
           </h2>
           <p className="text-muted-foreground text-sm">
-            Calcula tu promedio por materia y general
+            Incluye evaluaciones formales y componentes acumulativos
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={resetGrades} className="gap-2 rounded-full">
@@ -197,7 +331,7 @@ export function GradeCalculator({ section }: GradeCalculatorProps) {
           <div>
             <h3 className="text-lg font-semibold text-muted-foreground">Promedio General</h3>
             <p className="text-sm text-muted-foreground">
-              {subjects.filter(s => calculateSubjectAverage(s) !== null).length} de {subjects.length} materias
+              {subjects.filter(s => calculateSubjectGrade(s) !== null).length} de {subjects.length} materias
             </p>
           </div>
           <div className="text-right">
@@ -220,9 +354,10 @@ export function GradeCalculator({ section }: GradeCalculatorProps) {
         {subjects.map((subject) => {
           const subjectAssignments = subjectGroups[subject];
           const color = subjectAssignments[0].color;
-          const average = calculateSubjectAverage(subject);
-          const totalPercentage = subjectAssignments.reduce((sum, a) => sum + a.percentage, 0);
-          const completedCount = subjectAssignments.filter(a => grades[a.id] !== null && grades[a.id] !== undefined).length;
+          const result = calculateSubjectGrade(subject);
+          const totalItems = subjectAssignments.length;
+          const gradedItems = subjectAssignments.filter(a => grades[a.id] !== null && grades[a.id] !== undefined).length;
+          const hasCumulative = subjectAssignments.some(a => isCumulative(a.content, a.type));
 
           return (
             <Card
@@ -244,17 +379,18 @@ export function GradeCalculator({ section }: GradeCalculatorProps) {
                       {subject}
                     </h3>
                     <p className="text-xs text-muted-foreground">
-                      {completedCount}/{subjectAssignments.length} evaluaciones • {totalPercentage}%
+                      {gradedItems}/{totalItems} evaluaciones
+                      {hasCumulative && <span className="text-emerald-500"> • +bonus</span>}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {average !== null && (
+                  {result !== null && result.finalGrade > 0 && (
                     <span 
                       className="text-xl font-bold"
                       style={{ color: `hsl(var(--${color}))` }}
                     >
-                      {average.toFixed(1)}
+                      {result.finalGrade.toFixed(1)}
                     </span>
                   )}
                   <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
