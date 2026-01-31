@@ -525,7 +525,7 @@ ${result.grid.map(row => row.join("\t")).join("\n")}
                 className="gap-2"
               >
                 <Dna className="h-4 w-4" />
-                Heterocigoto (AaBb...)
+                Heterocigoto
               </Button>
               <Button
                 variant="outline"
@@ -534,7 +534,7 @@ ${result.grid.map(row => row.join("\t")).join("\n")}
                 className="gap-2"
               >
                 <Dna className="h-4 w-4" />
-                Homocigoto Dominante (AABB...)
+                Homocigoto Dominante
               </Button>
               <Button
                 variant="outline"
@@ -543,7 +543,7 @@ ${result.grid.map(row => row.join("\t")).join("\n")}
                 className="gap-2"
               >
                 <Dna className="h-4 w-4" />
-                Homocigoto Recesivo (aabb...)
+                Homocigoto Recesivo
               </Button>
             </div>
           </div>
