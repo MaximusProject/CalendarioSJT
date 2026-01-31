@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Dna, RefreshCw, Download, Info, BarChart3, 
   Grid3x3, Eye, EyeOff, Copy, CheckCheck, FileText,
-  Calculator, Filter, ZoomIn, ZoomOut
+  Calculator, Filter, ZoomIn, ZoomOut, HelpCircle
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -67,6 +67,7 @@ const EXAMPLE_CROSSES = {
     { parent1: "AaBb", parent2: "AaBb", label: "Doble heterocigoto" },
     { parent1: "aabb", parent2: "aabb", label: "Doble homocigoto recesivo" },
     { parent1: "AABB", parent2: "aabb", label: "Dihíbrido puro" },
+    { parent1: "CcBb", parent2: "CcBb", label: "Ejemplo mixto" },
   ],
 };
 
@@ -76,7 +77,7 @@ export function PunnettCalculator() {
   const [zoomLevel, setZoomLevel] = useState<ZoomLevel>(3);
   const [showDetails, setShowDetails] = useState(true);
   
-  // Estados para genotipos de padres
+  // Estados para genotipos de padres - corrigiendo el problema de mayúsculas
   const [parentGenotypes, setParentGenotypes] = useState({
     mono: { parent1: "Aa", parent2: "Aa" },
     di: { parent1: "AaBb", parent2: "AaBb" },
@@ -111,19 +112,46 @@ export function PunnettCalculator() {
     if (genotype.length !== alleleCount) return false;
     
     // Validar que sea formato válido (pares de alelos)
+    // Ahora acepta mayúsculas y minúsculas en cualquier orden
     for (let i = 0; i < genotype.length; i += 2) {
       const pair = genotype.substring(i, i + 2);
-      if (!/^[A-Z][a-z]$|^[a-z][A-Z]$|^[A-Z]{2}$|^[a-z]{2}$/.test(pair)) {
+      // Acepta: Aa, aA, AA, aa, Cc, cC, etc.
+      if (!/^[A-Za-z]{2}$/.test(pair)) {
         return false;
       }
     }
     return true;
   };
 
+  // Función para normalizar genotipo (ordenar alelos dentro de cada par)
+  const normalizeGenotype = (genotype: string): string => {
+    let normalized = "";
+    for (let i = 0; i < genotype.length; i += 2) {
+      const allele1 = genotype[i];
+      const allele2 = genotype[i + 1];
+      
+      // Ordenar: mayúscula primero, luego minúscula
+      if (allele1.toLowerCase() === allele2.toLowerCase()) {
+        // Misma letra, ordenar por mayúscula/minúscula
+        if (allele1 === allele1.toUpperCase()) {
+          normalized += allele1 + allele2;
+        } else {
+          normalized += allele2 + allele1;
+        }
+      } else {
+        // Diferentes letras, mantener orden pero normalizar formato
+        normalized += allele1 + allele2;
+      }
+    }
+    return normalized;
+  };
+
   const generateGametes = (genotype: string): string[] => {
     const pairs = [];
-    for (let i = 0; i < genotype.length; i += 2) {
-      pairs.push([genotype[i], genotype[i + 1]]);
+    const normalizedGenotype = normalizeGenotype(genotype);
+    
+    for (let i = 0; i < normalizedGenotype.length; i += 2) {
+      pairs.push([normalizedGenotype[i], normalizedGenotype[i + 1]]);
     }
 
     const gametes: string[] = [];
@@ -212,7 +240,7 @@ export function PunnettCalculator() {
     const genotype2 = parents.parent2;
 
     if (!validateGenotype(genotype1, crossType) || !validateGenotype(genotype2, crossType)) {
-      toast.error("Formato de genotipo inválido");
+      toast.error("Formato de genotipo inválido. Usa pares de letras como Aa, CcBb, etc.");
       return;
     }
 
@@ -340,9 +368,13 @@ ${result.grid.map(row => row.join("\t")).join("\n")}
     toast.success("Ratios copiados al portapapeles");
   };
 
+  // CORRECCIÓN: Permite mayúsculas y minúsculas sin convertirlas automáticamente
   const handleParentChange = (parent: "parent1" | "parent2", value: string) => {
     const maxLength = getAlleleCount();
-    const trimmedValue = value.slice(0, maxLength).toUpperCase();
+    
+    // Solo permite letras y mantiene el caso original
+    const lettersOnly = value.replace(/[^A-Za-z]/g, '');
+    const trimmedValue = lettersOnly.slice(0, maxLength);
     
     setParentGenotypes(prev => ({
       ...prev,
@@ -353,20 +385,55 @@ ${result.grid.map(row => row.join("\t")).join("\n")}
     }));
   };
 
+  const handleQuickEntry = (pattern: string) => {
+    const maxLength = getAlleleCount();
+    let generatedPattern = "";
+    
+    // Generar patrón basado en el tipo de cruce
+    if (pattern === "heterozygous") {
+      // AaBbCc...
+      for (let i = 0; i < maxLength / 2; i++) {
+        const letter = String.fromCharCode(65 + i); // A, B, C, etc.
+        generatedPattern += letter + letter.toLowerCase();
+      }
+    } else if (pattern === "homozygousDominant") {
+      // AABBCC...
+      for (let i = 0; i < maxLength / 2; i++) {
+        const letter = String.fromCharCode(65 + i);
+        generatedPattern += letter + letter;
+      }
+    } else if (pattern === "homozygousRecessive") {
+      // aabbcc...
+      for (let i = 0; i < maxLength / 2; i++) {
+        const letter = String.fromCharCode(97 + i);
+        generatedPattern += letter + letter;
+      }
+    }
+    
+    // Aplicar a ambos padres
+    setParentGenotypes(prev => ({
+      ...prev,
+      [crossType]: {
+        parent1: generatedPattern,
+        parent2: generatedPattern
+      }
+    }));
+  };
+
   const renderCellContent = (genotype: string) => {
     switch (displayMode) {
       case "genotype":
-        return <span className="font-bold">{genotype}</span>;
+        return <span className="font-bold font-mono">{genotype}</span>;
       case "phenotype":
         return <span className="text-sm">{getPhenotypeFromGenotype(genotype)}</span>;
       case "simple":
         return <span className="font-mono">{getSimplePhenotype(genotype)}</span>;
       case "color":
-        return <span className="font-bold">{genotype}</span>;
+        return <span className="font-bold font-mono">{genotype}</span>;
       case "detailed":
         return (
           <div className="text-xs">
-            <div className="font-bold">{genotype}</div>
+            <div className="font-bold font-mono">{genotype}</div>
             <div className="text-muted-foreground">{getSimplePhenotype(genotype)}</div>
           </div>
         );
@@ -444,8 +511,45 @@ ${result.grid.map(row => row.join("\t")).join("\n")}
             </TabsList>
           </Tabs>
 
-          {/* Modos de Visualización */}
+          {/* Entrada rápida */}
           <div className="space-y-3">
+            <Label className="text-base font-semibold flex items-center gap-2">
+              <HelpCircle className="h-4 w-4" />
+              CONFIGURACIÓN RÁPIDA
+            </Label>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleQuickEntry("heterozygous")}
+                className="gap-2"
+              >
+                <Dna className="h-4 w-4" />
+                Heterocigoto (AaBb...)
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleQuickEntry("homozygousDominant")}
+                className="gap-2"
+              >
+                <Dna className="h-4 w-4" />
+                Homocigoto Dominante (AABB...)
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleQuickEntry("homozygousRecessive")}
+                className="gap-2"
+              >
+                <Dna className="h-4 w-4" />
+                Homocigoto Recesivo (aabb...)
+              </Button>
+            </div>
+          </div>
+
+          {/* Modos de Visualización */}
+          <div className="space-y-3 mt-4">
             <Label className="text-base font-semibold">TIPO DE DATOS</Label>
             <div className="flex flex-wrap gap-2">
               {DISPLAY_MODES.map((mode) => {
@@ -476,13 +580,27 @@ ${result.grid.map(row => row.join("\t")).join("\n")}
                     {getAlleleCount()} alelos
                   </Badge>
                 </div>
+                {/* CORRECCIÓN: Input sin auto-uppercase */}
                 <Input
                   value={currentParents.parent1}
                   onChange={(e) => handleParentChange("parent1", e.target.value)}
-                  placeholder={`Ej: ${"A".repeat(getAlleleCount()/2)}${"a".repeat(getAlleleCount()/2)}`}
+                  placeholder={`Ej: ${crossType === "mono" ? "Aa" : crossType === "di" ? "AaBb" : "AaBbCc"}`}
                   className="text-center text-xl font-mono rounded-xl h-12 border-2"
                   maxLength={getAlleleCount()}
                 />
+                
+                {/* Indicador de formato válido */}
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${validateGenotype(currentParents.parent1, crossType) ? "bg-green-500" : "bg-red-500"}`} />
+                    <span className={validateGenotype(currentParents.parent1, crossType) ? "text-green-600" : "text-red-600"}>
+                      {validateGenotype(currentParents.parent1, crossType) ? "Formato válido" : "Formato inválido"}
+                    </span>
+                  </div>
+                  <span className="text-muted-foreground font-mono">
+                    {currentParents.parent1.length}/{getAlleleCount()}
+                  </span>
+                </div>
                 
                 {/* Ejemplos rápidos */}
                 <div className="space-y-2">
@@ -492,7 +610,7 @@ ${result.grid.map(row => row.join("\t")).join("\n")}
                       <Badge
                         key={idx}
                         variant="secondary"
-                        className="cursor-pointer hover:bg-secondary/80"
+                        className="cursor-pointer hover:bg-secondary/80 font-mono"
                         onClick={() => handleExampleSelect(example)}
                       >
                         {example.parent1}
@@ -511,13 +629,27 @@ ${result.grid.map(row => row.join("\t")).join("\n")}
                     {getAlleleCount()} alelos
                   </Badge>
                 </div>
+                {/* CORRECCIÓN: Input sin auto-uppercase */}
                 <Input
                   value={currentParents.parent2}
                   onChange={(e) => handleParentChange("parent2", e.target.value)}
-                  placeholder={`Ej: ${"A".repeat(getAlleleCount()/2)}${"a".repeat(getAlleleCount()/2)}`}
+                  placeholder={`Ej: ${crossType === "mono" ? "Aa" : crossType === "di" ? "AaBb" : "AaBbCc"}`}
                   className="text-center text-xl font-mono rounded-xl h-12 border-2"
                   maxLength={getAlleleCount()}
                 />
+                
+                {/* Indicador de formato válido */}
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-3 h-3 rounded-full ${validateGenotype(currentParents.parent2, crossType) ? "bg-green-500" : "bg-red-500"}`} />
+                    <span className={validateGenotype(currentParents.parent2, crossType) ? "text-green-600" : "text-red-600"}>
+                      {validateGenotype(currentParents.parent2, crossType) ? "Formato válido" : "Formato inválido"}
+                    </span>
+                  </div>
+                  <span className="text-muted-foreground font-mono">
+                    {currentParents.parent2.length}/{getAlleleCount()}
+                  </span>
+                </div>
                 
                 {/* Ejemplos rápidos */}
                 <div className="space-y-2">
@@ -527,7 +659,7 @@ ${result.grid.map(row => row.join("\t")).join("\n")}
                       <Badge
                         key={idx}
                         variant="secondary"
-                        className="cursor-pointer hover:bg-secondary/80"
+                        className="cursor-pointer hover:bg-secondary/80 font-mono"
                         onClick={() => handleExampleSelect(example)}
                       >
                         {example.parent2}
@@ -544,6 +676,7 @@ ${result.grid.map(row => row.join("\t")).join("\n")}
             onClick={handleCalculate} 
             className="w-full mt-6 rounded-xl h-14 gap-3 text-lg shadow-md hover:shadow-lg transition-all"
             size="lg"
+            disabled={!validateGenotype(currentParents.parent1, crossType) || !validateGenotype(currentParents.parent2, crossType)}
           >
             <Calculator className="h-5 w-5" />
             Calcular Cruce Genético
@@ -553,13 +686,15 @@ ${result.grid.map(row => row.join("\t")).join("\n")}
           <div className="flex items-start gap-3 p-4 bg-muted/30 rounded-xl">
             <Info className="h-5 w-5 text-muted-foreground mt-0.5" />
             <div className="space-y-1">
-              <p className="text-sm font-medium">Instrucciones:</p>
+              <p className="text-sm font-medium">Instrucciones de formato:</p>
               <p className="text-sm text-muted-foreground">
                 • Usa mayúsculas para alelos dominantes (A, B, C) y minúsculas para recesivos (a, b, c)
                 <br />
-                • Para cruces dihíbridos y superiores, usa pares de alelos consecutivos (AaBb, AaBbCc, etc.)
+                • Los pares deben tener 2 letras cada uno (Aa, Bb, Cc, etc.)
                 <br />
-                • Los resultados incluyen análisis detallado de ratios genotípicos y fenotípicos
+                • Puedes usar cualquier combinación: <span className="font-mono">Aa, aA, CC, cc, Cc, cC</span>
+                <br />
+                • Ejemplos válidos: <span className="font-mono">AaBb, CcBb, aabb, AABB</span>
               </p>
             </div>
           </div>

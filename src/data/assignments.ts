@@ -31,7 +31,7 @@ export const assignments: Assignment[] = [
     type: "Prueba",
     points: 4,
     percentage: 20,
-    date: "2026-02-03",
+    date: "2026-02-03", // Martes - válido
     color: "quimica"
   },
   {
@@ -41,7 +41,7 @@ export const assignments: Assignment[] = [
     type: "Práctica de laboratorio",
     points: 3,
     percentage: 15,
-    date: "2026-02-19",
+    date: "2026-02-19", // Jueves - válido
     color: "quimica"
   },
   {
@@ -51,7 +51,7 @@ export const assignments: Assignment[] = [
     type: "Práctica de laboratorio",
     points: 3,
     percentage: 15,
-    date: "2026-02-24",
+    date: "2026-02-24", // Martes - válido
     color: "quimica"
   },
   {
@@ -61,7 +61,7 @@ export const assignments: Assignment[] = [
     type: "Prueba",
     points: 4,
     percentage: 20,
-    date: "2026-03-11",
+    date: "2026-03-12", // Cambiado de 2026-03-11 (miércoles) a jueves
     color: "quimica"
   },
   {
@@ -71,7 +71,7 @@ export const assignments: Assignment[] = [
     type: "Taller",
     points: 4,
     percentage: 20,
-    date: "2026-03-25",
+    date: "2026-03-26", // Cambiado de 2026-03-25 (miércoles) a jueves
     color: "quimica"
   },
 
@@ -83,7 +83,7 @@ export const assignments: Assignment[] = [
     type: "Taller",
     points: 4,
     percentage: 20,
-    date: "2026-01-28",
+    date: "2026-01-28", // Miércoles - válido
     color: "fisica"
   },
   {
@@ -93,7 +93,7 @@ export const assignments: Assignment[] = [
     type: "Prueba",
     points: 4,
     percentage: 20,
-    date: "2026-02-11",
+    date: "2026-02-11", // Miércoles - válido
     color: "fisica"
   },
   {
@@ -103,7 +103,7 @@ export const assignments: Assignment[] = [
     type: "Infografía",
     points: 3,
     percentage: 15,
-    date: "2026-02-25",
+    date: "2026-02-25", // Miércoles - válido
     color: "fisica"
   },
   {
@@ -113,7 +113,7 @@ export const assignments: Assignment[] = [
     type: "Prueba",
     points: 4,
     percentage: 20,
-    date: "2026-03-10",
+    date: "2026-03-10", // Martes - válido
     color: "fisica"
   },
   {
@@ -123,7 +123,7 @@ export const assignments: Assignment[] = [
     type: "Laboratorio",
     points: 3,
     percentage: 15,
-    date: "2026-03-24",
+    date: "2026-03-24", // Martes - válido
     color: "fisica"
   },
 
@@ -135,7 +135,7 @@ export const assignments: Assignment[] = [
     type: "Taller",
     points: 2,
     percentage: 10,
-    date: "2026-02-02",
+    date: "2026-02-13", // Cambiado de 2026-02-02 (lunes) a viernes
     color: "biology"
   },
   {
@@ -145,7 +145,7 @@ export const assignments: Assignment[] = [
     type: "Taller",
     points: 2,
     percentage: 10,
-    date: "2026-02-20",
+    date: "2026-02-20", // Viernes - válido
     color: "biology"
   },
   {
@@ -155,7 +155,7 @@ export const assignments: Assignment[] = [
     type: "Prueba Corta",
     points: 4,
     percentage: 20,
-    date: "2026-02-25",
+    date: "2026-03-03", // Cambiado de 2026-02-25 (miércoles) a martes
     color: "biology"
   },
   {
@@ -165,7 +165,7 @@ export const assignments: Assignment[] = [
     type: "Taller",
     points: 2,
     percentage: 10,
-    date: "2026-03-04",
+    date: "2026-03-06", // Cambiado de 2026-03-04 (miércoles) a viernes
     color: "biology"
   },
   {
@@ -175,7 +175,7 @@ export const assignments: Assignment[] = [
     type: "Exposición",
     points: 4,
     percentage: 20,
-    date: "2026-03-11",
+    date: "2026-03-17", // Cambiado de 2026-03-11 (miércoles) a martes
     color: "biology"
   },
 
@@ -187,7 +187,7 @@ export const assignments: Assignment[] = [
     type: "Taller",
     points: 3,
     percentage: 15,
-    date: "2026-01-26",
+    date: "2026-01-26", // Lunes - válido
     color: "soberania"
   },
   {
@@ -197,7 +197,7 @@ export const assignments: Assignment[] = [
     type: "Cartograma",
     points: 2,
     percentage: 10,
-    date: "2026-02-09",
+    date: "2026-02-09", // Lunes - válido
     color: "soberania"
   },
   {
@@ -207,7 +207,7 @@ export const assignments: Assignment[] = [
     type: "Prueba Escrita",
     points: 4,
     percentage: 20,
-    date: "2026-03-16",
+    date: "2026-03-16", // Lunes - válido
     color: "soberania"
   },
   {
@@ -217,7 +217,7 @@ export const assignments: Assignment[] = [
     type: "Ensayo",
     points: 4,
     percentage: 20,
-    date: "2026-03-23",
+    date: "2026-03-23", // Lunes - válido
     color: "soberania"
   },
   {
@@ -227,7 +227,7 @@ export const assignments: Assignment[] = [
     type: "Revisión de cuaderno",
     points: 3,
     percentage: 15,
-    date: "2026-04-06",
+    date: "2026-04-06", // Lunes - válido
     color: "soberania"
   },
 
@@ -239,7 +239,7 @@ export const assignments: Assignment[] = [
     type: "Workshop",
     points: 3,
     percentage: 15,
-    date: "2026-02-06",
+    date: "2026-02-06", // Viernes - válido
     color: "ingles"
   },
   {
@@ -249,7 +249,7 @@ export const assignments: Assignment[] = [
     type: "Comic",
     points: 3,
     percentage: 15,
-    date: "2026-02-20",
+    date: "2026-02-20", // Viernes - válido
     color: "ingles"
   },
   {
@@ -259,7 +259,7 @@ export const assignments: Assignment[] = [
     type: "Reading Comprehension",
     points: 4,
     percentage: 20,
-    date: "2026-02-27",
+    date: "2026-02-27", // Viernes - válido
     color: "ingles"
   },
   {
@@ -269,7 +269,7 @@ export const assignments: Assignment[] = [
     type: "Test",
     points: 4,
     percentage: 20,
-    date: "2026-03-13",
+    date: "2026-03-13", // Viernes - válido
     color: "ingles"
   },
   {
@@ -279,7 +279,7 @@ export const assignments: Assignment[] = [
     type: "Test",
     points: 4,
     percentage: 20,
-    date: "2026-03-27",
+    date: "2026-03-27", // Viernes - válido
     color: "ingles"
   },
 
@@ -291,7 +291,7 @@ export const assignments: Assignment[] = [
     type: "Taller #1",
     points: 4,
     percentage: 20,
-    date: "2026-01-28",
+    date: "2026-01-28", // Miércoles - válido
     color: "matematicas"
   },
   {
@@ -301,7 +301,7 @@ export const assignments: Assignment[] = [
     type: "Prueba #1",
     points: 4,
     percentage: 20,
-    date: "2026-02-11",
+    date: "2026-02-11", // Miércoles - válido
     color: "matematicas"
   },
   {
@@ -311,7 +311,7 @@ export const assignments: Assignment[] = [
     type: "Taller #2",
     points: 4,
     percentage: 20,
-    date: "2026-03-04",
+    date: "2026-03-04", // Miércoles - válido
     color: "matematicas"
   },
   {
@@ -321,7 +321,7 @@ export const assignments: Assignment[] = [
     type: "Prueba #2",
     points: 4,
     percentage: 20,
-    date: "2026-03-25",
+    date: "2026-03-25", // Miércoles - válido
     color: "matematicas"
   },
 
@@ -333,7 +333,7 @@ export const assignments: Assignment[] = [
     type: "Prueba",
     points: 4,
     percentage: 20,
-    date: "2026-02-02",
+    date: "2026-02-02", // Lunes - válido
     color: "ghc"
   },
   {
@@ -343,8 +343,17 @@ export const assignments: Assignment[] = [
     type: "Exposiciones",
     points: 4,
     percentage: 20,
-    date: "2026-02-02",
+    date: "2026-02-02", // Lunes - válido
     notes: "Del lunes 2 al 12",
+    color: "ghc"
+  },
+  {
+    id: "ghc-3",
+    subject: "GHC",
+    content: "Gobierno del Liberalismo Amarillo",
+    type: "Cuadro resumen",
+    percentage: 15,
+	date: "2026-02-19",
     color: "ghc"
   },
   {
@@ -354,7 +363,7 @@ export const assignments: Assignment[] = [
     type: "Prueba",
     points: 4,
     percentage: 20,
-    date: "2026-03-23",
+    date: "2026-03-23", // Lunes - válido
     color: "ghc"
   },
   {
@@ -364,7 +373,7 @@ export const assignments: Assignment[] = [
     type: "Infografía",
     points: 3,
     percentage: 15,
-    date: "2026-03-16",
+    date: "2026-03-16", // Lunes - válido
     notes: "Alternativa a la prueba",
     color: "ghc"
   },
@@ -377,7 +386,7 @@ export const assignments: Assignment[] = [
     type: "Maqueta/Biografía",
     points: 4,
     percentage: 20,
-    date: "2026-01-28",
+    date: "2026-01-28", // Miércoles - válido
     notes: "Del 28/01 al 13/02",
     color: "castellano"
   },
@@ -388,7 +397,7 @@ export const assignments: Assignment[] = [
     type: "Prueba",
     points: 4,
     percentage: 20,
-    date: "2026-02-20",
+    date: "2026-02-20", // Viernes - válido
     color: "castellano"
   },
   {
@@ -398,7 +407,7 @@ export const assignments: Assignment[] = [
     type: "Infografía/Biografía",
     points: 4,
     percentage: 20,
-    date: "2026-03-08",
+    date: "2026-03-11", // Cambiado de 2026-03-08 (domingo) a miércoles
     color: "castellano"
   },
   {
@@ -408,7 +417,7 @@ export const assignments: Assignment[] = [
     type: "Comprensión lectora",
     points: 4,
     percentage: 20,
-    date: "2026-03-20",
+    date: "2026-03-20", // Viernes - válido
     color: "castellano"
   },
 ];
@@ -589,16 +598,6 @@ export const undatedAssignments: UndatedAssignment[] = [
     percentage: 10,
     notes: "Disciplina, respeto, etc.",
     color: "matematicas"
-  },
-
-  // GHC (sin fecha)
-  {
-    id: "ghc-3",
-    subject: "GHC",
-    content: "Gobierno del Liberalismo Amarillo",
-    type: "Cuadro resumen",
-    percentage: 15,
-    color: "ghc"
   },
 
   // Castellano (sin fecha)

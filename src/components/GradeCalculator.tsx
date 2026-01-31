@@ -22,7 +22,7 @@ interface GradeEntry {
 // Tipos de evaluación que son acumulativos (suman puntos, no restan)
 const CUMULATIVE_TYPES = [
   "rasgos", "cuaderno", "participación", "actitud", "personal features", 
-  "traits", "cahier", "revisión", "pastoral", "recuperación"
+  "traits", "cahier", "revisión", "pastoral", "recuperación", "aspectos formales"
 ];
 
 // Función para determinar si es una evaluación acumulativa
