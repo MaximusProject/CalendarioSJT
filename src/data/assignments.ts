@@ -343,8 +343,8 @@ export const assignments: Assignment[] = [
     type: "Exposiciones",
     points: 4,
     percentage: 20,
-    date: "2026-02-02", // Lunes - válido
-    notes: "Del lunes 2 al 12",
+    date: "2026-02-05", // Jueves - válido
+    notes: "Del lunes 2 al 12 (cambio de fecha)",
     color: "ghc"
   },
   {
