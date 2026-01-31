@@ -135,7 +135,7 @@ export const assignments: Assignment[] = [
     type: "Taller",
     points: 2,
     percentage: 10,
-    date: "2026-02-13", // Cambiado de 2026-02-02 (lunes) a viernes
+    date: "2026-02-3", // Cambiado de 2026-02-02 (lunes) a martes
     color: "biology"
   },
   {
@@ -155,7 +155,7 @@ export const assignments: Assignment[] = [
     type: "Prueba Corta",
     points: 4,
     percentage: 20,
-    date: "2026-03-03", // Cambiado de 2026-02-25 (miércoles) a martes
+    date: "2026-02-27", // Cambiado de 2026-02-25 (miércoles) a viernes
     color: "biology"
   },
   {
