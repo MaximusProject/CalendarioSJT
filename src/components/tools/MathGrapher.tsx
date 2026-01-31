@@ -3343,7 +3343,7 @@ export function MathGrapher() {
 
         {/* Pie de página */}
         <div className="text-center text-xs sm:text-sm text-muted-foreground mt-6 pt-4 border-t border-gray-200 dark:border-gray-800">
-          <p className="mb-2">© 2024 Calculadora Matemática Profesional • v2.0 • {deviceInfo.screenWidth}×{deviceInfo.screenHeight}px</p>
+          <p className="mb-2">© 2026 Calculadora Matemática Profesional • v2.0 • {deviceInfo.screenWidth}×{deviceInfo.screenHeight}px</p>
           <div className="flex flex-wrap justify-center gap-3 text-xs">
             <span className="flex items-center gap-1">
               <Thermometer className="h-3 w-3" />
