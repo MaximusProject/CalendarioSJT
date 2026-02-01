@@ -2,24 +2,46 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mi Calendario Académico - Organiza tus Tareas y Evaluaciones</title>
     <meta name="description" content="Calendario académico interactivo para estudiantes. Visualiza y organiza todas tus tareas, evaluaciones y trabajos escolares de forma simple y práctica." />
     <meta name="keywords" content="calendario académico, tareas escolares, evaluaciones, planificador estudiantil, organización escolar" />
     <meta name="author" content="Academic Calendar" />
-
+    
+    <!-- Important: Force UTF-8 encoding -->
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Language" content="es" />
+    
+    <!-- Open Graph tags -->
     <meta property="og:title" content="Mi Calendario Académico - Organiza tus Tareas y Evaluaciones" />
     <meta property="og:description" content="Calendario académico interactivo para estudiantes. Visualiza y organiza todas tus tareas, evaluaciones y trabajos escolares." />
     <meta property="og:type" content="website" />
-
+    <meta property="og:locale" content="es_ES" />
+    
+    <!-- Twitter tags -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Mi Calendario Académico" />
     <meta name="twitter:description" content="Calendario académico interactivo para estudiantes" />
-    <script type="module" crossorigin src="/CalendarioSJT/assets/index-Cp5rrlnH.js"></script>
-    <link rel="stylesheet" crossorigin href="/CalendarioSJT/assets/index-DEz6_6ld.css">
+    
+    <!-- Prevent indexing on development -->
+    <meta name="robots" content="index, follow" />
+    <script type="module" crossorigin src="/CalendarioSJT/assets/index-Cn9rBol4.js"></script>
+    <link rel="stylesheet" crossorigin href="/CalendarioSJT/assets/index-BnfYw60p.css">
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root"></div>
+    <!-- IMPORTANTE: Asegúrate de que esta ruta sea correcta -->
+    
+    <!-- Script para manejar errores de routing en desarrollo -->
+    <script>
+      // Evita que Vite sirva index.html para rutas del cliente
+      if (import.meta.hot) {
+        import.meta.hot.on('vite:beforeUpdate', () => {
+          window.location.reload();
+        });
+      }
+    </script>
   </body>
 </html>
