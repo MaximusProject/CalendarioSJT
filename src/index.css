@@ -183,6 +183,9 @@
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom);
   }
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
 }
 
 /* Touch feedback */
@@ -192,6 +195,77 @@
   }
   
   .active\:scale-98:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Mobile-first responsive typography */
+@media (max-width: 640px) {
+  html {
+    font-size: 15px;
+  }
+  
+  .container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
+
+/* Larger touch targets on mobile */
+@media (hover: none) and (pointer: coarse) {
+  button, 
+  [role="button"],
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Exception for inline elements */
+  .inline-btn {
+    min-height: auto;
+    min-width: auto;
+  }
+}
+
+/* Prevent text selection on touch */
+@media (hover: none) {
+  .no-select {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* Smooth page transitions */
+.page-transition {
+  animation: page-slide-in 0.3s ease-out;
+}
+
+@keyframes page-slide-in {
+  0% {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Card hover effects - desktop only */
+@media (hover: hover) {
+  .hover-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .hover-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px -10px hsl(var(--foreground) / 0.1);
+  }
+}
+
+/* Mobile card active state */
+@media (hover: none) {
+  .hover-card:active {
     transform: scale(0.98);
   }
 }

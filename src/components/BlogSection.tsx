@@ -1,11 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { usePinAuth } from "@/hooks/usePinAuth";
 import { 
   Plus, 
@@ -43,16 +42,10 @@ import { es } from "date-fns/locale";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { assignments as assignmentsSectionB } from "@/data/assignments";
 import { assignmentsSectionA } from "@/data/assignmentsSectionA";
+import { supabase } from "@/integrations/supabase/client";
+import type { Tables } from "@/types";
 
-interface BlogPost {
-  id: string;
-  title: string;
-  content: string;
-  imageUrl?: string;
-  links?: { label: string; url: string }[];
-  createdAt: string;
-  subjects: string[];
-}
+type BlogPost = Tables<'blog_posts'>;
 
 interface BlogSectionProps {
   section: "A" | "B";
@@ -60,27 +53,12 @@ interface BlogSectionProps {
 
 export function BlogSection({ section }: BlogSectionProps) {
   const { isAuthenticated } = usePinAuth();
-
-  const getInitialValue = (): BlogPost[] => {
-    if (section === "B") {
-      return [{
-        id: "prueba-clases-b",
-        title: "Prueba del Blog",
-        content: "Esta es solo una prueba del blog, aqu\u00ED se pasar\u00E1 im\u00E1genes de algunas clases en particular, materias, etc.",
-        imageUrl: "https://i.imgur.com/BWbyw9p.jpeg",
-        links: [{ label: "Ver material", url: "https://imgur.com/a/YLF9G6o" }],
-        createdAt: new Date().toISOString(),
-        subjects: [] 
-      }];
-    }
-    return [];
-  };
-
-  const [posts, setPosts] = useLocalStorage<BlogPost[]>(`blog-posts-section-${section}`, getInitialValue());
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -99,7 +77,9 @@ export function BlogSection({ section }: BlogSectionProps) {
   const activeSubjects = useMemo(() => {
     const subjects = new Set<string>();
     posts.forEach(post => {
-      post.subjects?.forEach(s => subjects.add(s));
+      if (post.subjects) {
+        post.subjects.forEach(s => subjects.add(s));
+      }
     });
     return Array.from(subjects);
   }, [posts]);
@@ -114,6 +94,47 @@ export function BlogSection({ section }: BlogSectionProps) {
     });
   }, [posts, selectedFilter, searchQuery]);
 
+  const loadPosts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('section', section)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      setPosts(data || []);
+    } catch (error) {
+      console.error("Error loading posts:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadPosts();
+
+    const channel = supabase
+      .channel('blog_posts_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'blog_posts',
+          filter: `section=eq.${section}`
+        },
+        () => {
+          loadPosts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [section]);
+
   const resetForm = () => {
     setTitle(""); setContent(""); setImageUrl(""); setLinks([]);
     setSelectedSubjects([]); setNewLinkLabel(""); setNewLinkUrl(""); 
@@ -125,8 +146,8 @@ export function BlogSection({ section }: BlogSectionProps) {
       setEditingPost(post);
       setTitle(post.title);
       setContent(post.content);
-      setImageUrl(post.imageUrl || "");
-      setLinks(post.links || []);
+      setImageUrl(post.image_url || "");
+      setLinks((post.links as { label: string; url: string }[]) || []);
       setSelectedSubjects(post.subjects || []);
     } else {
       resetForm();
@@ -151,34 +172,82 @@ export function BlogSection({ section }: BlogSectionProps) {
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!title || !content) return;
 
-    const newPost: BlogPost = {
-      id: editingPost?.id || crypto.randomUUID(),
-      title,
-      content,
-      imageUrl: imageUrl || undefined,
-      links: links.length > 0 ? links : undefined,
-      subjects: selectedSubjects,
-      createdAt: editingPost?.createdAt || new Date().toISOString(),
-    };
+    setIsLoading(true);
+    
+    try {
+      const postData = {
+        title,
+        content,
+        image_url: imageUrl || null,
+        links: links.length > 0 ? links : null,
+        subjects: selectedSubjects,
+        section,
+        is_active: true
+      };
 
-    if (editingPost) {
-      setPosts(posts.map(p => p.id === editingPost.id ? newPost : p));
-    } else {
-      setPosts([newPost, ...posts]);
+      let result;
+      
+      if (editingPost) {
+        const { data, error } = await supabase
+          .from('blog_posts')
+          .update(postData)
+          .eq('id', editingPost.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        result = data;
+      } else {
+        const { data, error } = await supabase
+          .from('blog_posts')
+          .insert([postData])
+          .select()
+          .single();
+
+        if (error) throw error;
+        result = data;
+      }
+
+      if (result) {
+        if (editingPost) {
+          setPosts(posts.map(p => p.id === editingPost.id ? result : p));
+        } else {
+          setPosts([result, ...posts]);
+        }
+      }
+
+      resetForm();
+      setIsDialogOpen(false);
+      
+    } catch (error) {
+      console.error("Error saving post:", error);
+    } finally {
+      setIsLoading(false);
     }
-
-    resetForm();
-    setIsDialogOpen(false);
   };
 
-  const handleDelete = (id: string) => {
-    setPosts(posts.filter(p => p.id !== id));
+  const handleDelete = async (id: string) => {
+    if (!confirm("?Est芍s seguro de eliminar esta publicaci車n?")) return;
+
+    try {
+      const { error } = await supabase
+        .from('blog_posts')
+        .update({ is_active: false })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setPosts(posts.filter(p => p.id !== id));
+      
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
   };
 
-  const getImageUrlParsed = (url: string) => {
+  const getImageUrlParsed = (url: string | null) => {
     if (!url) return "";
     let cleanUrl = url.replace(/\[img\]|\[\/img\]/gi, "").trim();
     if (cleanUrl.includes('imgur.com/a/')) {
@@ -204,7 +273,7 @@ export function BlogSection({ section }: BlogSectionProps) {
         <div className="space-y-1">
           <h2 className="text-2xl font-bold tracking-tight">Anuncios</h2>
           <p className="text-sm text-muted-foreground">
-            Secci&oacute;n {section} &bull; {filteredPosts.length} publicaciones
+            Secci車n {section} ? {filteredPosts.length} publicaciones
           </p>
         </div>
         
@@ -218,28 +287,30 @@ export function BlogSection({ section }: BlogSectionProps) {
             <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl">
               <DialogHeader>
                 <DialogTitle>
-                  {editingPost ? "Editar publicaci\u00F3n" : "Nueva publicaci\u00F3n"}
+                  {editingPost ? "Editar publicaci車n" : "Nueva publicaci車n"}
                 </DialogTitle>
               </DialogHeader>
               
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label>T&iacute;tulo</Label>
+                  <Label>T赤tulo</Label>
                   <Input
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="T&iacute;tulo de la publicaci\u00F3n"
+                    placeholder="T赤tulo de la publicaci車n"
                     className="rounded-xl"
+                    disabled={isLoading}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Descripci&oacute;n</Label>
+                  <Label>Descripci車n</Label>
                   <Textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="Escribe tu mensaje..."
                     className="min-h-[100px] rounded-xl resize-none"
+                    disabled={isLoading}
                   />
                 </div>
 
@@ -260,7 +331,7 @@ export function BlogSection({ section }: BlogSectionProps) {
                             backgroundColor: `hsl(var(--${color}))`,
                             borderColor: `hsl(var(--${color}))`
                           } : {}}
-                          onClick={() => toggleSubject(subject)}
+                          onClick={() => !isLoading && toggleSubject(subject)}
                         >
                           {subject}
                         </Badge>
@@ -278,6 +349,7 @@ export function BlogSection({ section }: BlogSectionProps) {
                     onChange={(e) => setImageUrl(e.target.value)}
                     placeholder="https://imgur.com/..."
                     className="rounded-xl"
+                    disabled={isLoading}
                   />
                 </div>
 
@@ -288,23 +360,50 @@ export function BlogSection({ section }: BlogSectionProps) {
                   {links.map((link, index) => (
                     <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-xl">
                       <span className="flex-1 text-sm truncate">{link.label}</span>
-                      <Button variant="ghost" size="icon" onClick={() => handleRemoveLink(index)} className="h-8 w-8 rounded-full">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => handleRemoveLink(index)} 
+                        className="h-8 w-8 rounded-full"
+                        disabled={isLoading}
+                      >
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
                   ))}
                   <div className="flex gap-2">
-                    <Input value={newLinkLabel} onChange={(e) => setNewLinkLabel(e.target.value)} placeholder="Etiqueta" className="rounded-xl" />
-                    <Input value={newLinkUrl} onChange={(e) => setNewLinkUrl(e.target.value)} placeholder="URL" className="rounded-xl" />
-                    <Button variant="outline" onClick={handleAddLink} disabled={!newLinkLabel || !newLinkUrl} className="rounded-xl">
+                    <Input 
+                      value={newLinkLabel} 
+                      onChange={(e) => setNewLinkLabel(e.target.value)} 
+                      placeholder="Etiqueta" 
+                      className="rounded-xl"
+                      disabled={isLoading}
+                    />
+                    <Input 
+                      value={newLinkUrl} 
+                      onChange={(e) => setNewLinkUrl(e.target.value)} 
+                      placeholder="URL" 
+                      className="rounded-xl"
+                      disabled={isLoading}
+                    />
+                    <Button 
+                      variant="outline" 
+                      onClick={handleAddLink} 
+                      disabled={!newLinkLabel || !newLinkUrl || isLoading} 
+                      className="rounded-xl"
+                    >
                       <Plus className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
 
-                <Button onClick={handleSubmit} className="w-full gap-2 h-12 rounded-xl">
+                <Button 
+                  onClick={handleSubmit} 
+                  className="w-full gap-2 h-12 rounded-xl"
+                  disabled={isLoading || !title.trim() || !content.trim()}
+                >
                   <Save className="h-4 w-4" />
-                  {editingPost ? "Guardar cambios" : "Publicar"}
+                  {isLoading ? "Guardando..." : (editingPost ? "Guardar cambios" : "Publicar")}
                 </Button>
               </div>
             </DialogContent>
@@ -362,7 +461,7 @@ export function BlogSection({ section }: BlogSectionProps) {
           </div>
           <h3 className="text-lg font-semibold">{searchQuery || selectedFilter ? "Sin resultados" : "Sin publicaciones"}</h3>
           <p className="text-muted-foreground text-sm">
-            {searchQuery || selectedFilter ? "Intenta con otros filtros" : `Los anuncios de la Secci\u00F3n ${section} aparecer\u00E1n aqu\u00ED`}
+            {searchQuery || selectedFilter ? "Intenta con otros filtros" : `Los anuncios de la Secci車n ${section} aparecer芍n aqu赤`}
           </p>
         </Card>
       ) : (
@@ -377,9 +476,9 @@ export function BlogSection({ section }: BlogSectionProps) {
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-semibold text-sm">Secci&oacute;n {section}</p>
+                    <p className="font-semibold text-sm">Secci車n {section}</p>
                     <p className="text-xs text-muted-foreground">
-                      {format(new Date(post.createdAt), "d MMM yyyy", { locale: es })}
+                      {format(new Date(post.created_at), "d MMM yyyy", { locale: es })}
                     </p>
                   </div>
                 </div>
@@ -424,9 +523,9 @@ export function BlogSection({ section }: BlogSectionProps) {
                 </div>
               )}
 
-              {post.imageUrl && (
+              {post.image_url && (
                 <a 
-                  href={getImageUrlParsed(post.imageUrl)} 
+                  href={getImageUrlParsed(post.image_url)} 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="block aspect-video bg-muted relative group overflow-hidden"
@@ -435,7 +534,7 @@ export function BlogSection({ section }: BlogSectionProps) {
                     <ExternalLink className="text-white h-8 w-8" />
                   </div>
                   <img
-                    src={getImageUrlParsed(post.imageUrl)}
+                    src={getImageUrlParsed(post.image_url)}
                     alt={post.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://i.imgur.com/BWbyw9p.jpeg'; }}
@@ -456,9 +555,9 @@ export function BlogSection({ section }: BlogSectionProps) {
                   <span className="text-muted-foreground">{post.content}</span>
                 </p>
                 
-                {post.links && post.links.length > 0 && (
+                {post.links && Array.isArray(post.links) && post.links.length > 0 && (
                   <div className="flex flex-wrap gap-2 pt-1">
-                    {post.links.map((link, index) => (
+                    {(post.links as { label: string; url: string }[]).map((link, index) => (
                       <a
                         key={index}
                         href={link.url}
