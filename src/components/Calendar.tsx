@@ -9,6 +9,7 @@ import { usePinAuth } from "@/hooks/usePinAuth";
 import { useSettings } from "@/hooks/useSettings";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameDay, isToday, isBefore, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CalendarProps {
   onDayClick: (date: Date, assignments: Assignment[]) => void;
@@ -27,13 +28,58 @@ export function Calendar({ onDayClick, section }: CalendarProps) {
   const monthEnd = endOfMonth(currentDate);
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
+  // 🚨 FUNCIÓN CRÍTICA: Carga días con comentarios para TODOS
   useEffect(() => {
-    // Nota: Asegúrate de tener configurado supabase si vas a usar esta funcionalidad
-    /* if (!isAuthenticated) return;
-    const fetchComments = async () => { ... }
-    fetchComments();
-    */
-  }, [currentDate, isAuthenticated, monthStart, monthEnd]);
+    const fetchDaysWithComments = async () => {
+      try {
+        console.log("🔍 Buscando días con comentarios...");
+        
+        const { data, error } = await supabase
+          .from('day_comments')
+          .select('day')
+          .gte('day', format(monthStart, 'yyyy-MM-dd'))
+          .lte('day', format(monthEnd, 'yyyy-MM-dd'));
+
+        if (error) {
+          console.error("❌ Error Supabase:", error);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          const daysSet = new Set(data.map(item => item.day));
+          console.log(`✅ ${daysSet.size} días con comentarios encontrados`);
+          setDaysWithComments(daysSet);
+        } else {
+          console.log("ℹ️ No hay comentarios este mes");
+          setDaysWithComments(new Set());
+        }
+      } catch (error) {
+        console.error("💥 Error inesperado:", error);
+      }
+    };
+
+    fetchDaysWithComments();
+
+    // 🔄 Suscripción en tiempo real
+    const channel = supabase
+      .channel('calendar_comments_tracker')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'day_comments'
+        },
+        () => {
+          fetchDaysWithComments(); // Recargar cuando haya cambios
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [monthStart, monthEnd]);
 
   const firstDayOfWeek = getDay(monthStart);
   const emptyDays = Array.from({ length: firstDayOfWeek }, (_, i) => i);
@@ -138,7 +184,8 @@ export function Calendar({ onDayClick, section }: CalendarProps) {
                   )}
                 </div>
               )}
-              {hasComments && isAuthenticated && (
+              {/* 🚨 CAMBIO CRÍTICO: Mostrar etiqueta a TODOS */}
+              {hasComments && (
                 <Tag className="h-2.5 w-2.5 text-primary absolute top-0.5 right-0.5" />
               )}
             </button>

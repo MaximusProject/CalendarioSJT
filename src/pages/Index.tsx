@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react"; // AÑADE useEffect
 import { Calendar } from "@/components/Calendar";
 import { NextWeekSection } from "@/components/NextWeekSection";
 import { DayDetailsDialog } from "@/components/DayDetailsDialog";
@@ -20,8 +20,10 @@ import {
   ArrowLeftRight,
   Calculator,
   Home,
-  Beaker
-} from "lucide-react";
+  Beaker,
+  Shield,
+  MessageSquare
+} from "lucide-react"; // AÑADE Shield y MessageSquare
 import { Button } from "@/components/ui/button";
 import { usePinAuth } from "@/hooks/usePinAuth";
 import { useSettings } from "@/hooks/useSettings";
@@ -37,6 +39,19 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>("home");
   const { isAuthenticated, logout } = usePinAuth();
   const { settings, setSection, clearSection } = useSettings();
+
+  // 🆕 ESCUCHAR EVENTO PARA ABRIR PIN DIALOG
+  useEffect(() => {
+    const handleOpenPinDialog = () => {
+      setPinDialogOpen(true);
+    };
+
+    window.addEventListener('open-pin-dialog', handleOpenPinDialog);
+    
+    return () => {
+      window.removeEventListener('open-pin-dialog', handleOpenPinDialog);
+    };
+  }, []);
 
   const handleDayClick = (date: Date, assignments: Assignment[]) => {
     setSelectedDate(date);
@@ -76,6 +91,13 @@ const Index = () => {
             >
               {settings.selectedSection}
             </span>
+            {/* 🆕 INDICADOR DE AUTENTICACIÓN */}
+            {isAuthenticated && (
+              <span className="hidden lg:flex items-center gap-1 text-[10px] lg:text-xs font-semibold px-1.5 lg:px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                <Shield className="h-3 w-3" />
+                Moderador
+              </span>
+            )}
           </div>
           
           <div className="flex items-center gap-0.5 lg:gap-1">
@@ -100,6 +122,7 @@ const Index = () => {
                 size="icon"
                 onClick={logout}
                 className="h-8 w-8 lg:h-9 lg:w-9 rounded-full"
+                title="Salir del modo moderador"
               >
                 <LogOut className="h-4 w-4 lg:h-5 lg:w-5" />
               </Button>
@@ -109,6 +132,7 @@ const Index = () => {
                 size="icon"
                 onClick={() => setPinDialogOpen(true)}
                 className="h-8 w-8 lg:h-9 lg:w-9 rounded-full"
+                title="Ingresar como moderador"
               >
                 <Lock className="h-4 w-4 lg:h-5 lg:w-5" />
               </Button>
@@ -125,6 +149,18 @@ const Index = () => {
             <div className="flex gap-2 lg:hidden overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
               <ExportPDF section={settings.selectedSection} />
               <ColorLegend />
+              {/* 🆕 BOTÓN PARA ABRIR PIN DIALOG EN MÓVIL */}
+              {!isAuthenticated && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPinDialogOpen(true)}
+                  className="gap-1 whitespace-nowrap"
+                >
+                  <Lock className="h-3 w-3" />
+                  Moderador
+                </Button>
+              )}
             </div>
             
             <div data-calendar-export>
@@ -219,6 +255,21 @@ const Index = () => {
                 </Button>
               );
             })}
+            {/* 🆕 BOTÓN EXTRA PARA COMENTARIOS EN DESKTOP */}
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (selectedDate) {
+                  setDialogOpen(true);
+                }
+              }}
+              className="gap-2 rounded-full"
+              disabled={!selectedDate}
+              title="Ver comentarios del día seleccionado"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Comentarios
+            </Button>
           </div>
         </div>
       </div>
