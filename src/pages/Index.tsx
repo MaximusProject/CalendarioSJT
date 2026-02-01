@@ -279,6 +279,7 @@ const Index = () => {
         onOpenChange={setDialogOpen}
         date={selectedDate}
         assignments={selectedAssignments}
+		section={settings.selectedSection}
       />
 
       <PinDialog open={pinDialogOpen} onOpenChange={setPinDialogOpen} />

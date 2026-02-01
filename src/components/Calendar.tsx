@@ -28,15 +28,16 @@ export function Calendar({ onDayClick, section }: CalendarProps) {
   const monthEnd = endOfMonth(currentDate);
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-  // 🚨 FUNCIÓN CRÍTICA: Carga días con comentarios para TODOS
+  // 🚨 FUNCIÓN CRÍTICA: Carga días con comentarios por SECCIÓN
   useEffect(() => {
     const fetchDaysWithComments = async () => {
       try {
-        console.log("🔍 Buscando días con comentarios...");
+        console.log(`🔍 Buscando días con comentarios para sección ${section}...`);
         
         const { data, error } = await supabase
           .from('day_comments')
           .select('day')
+          .eq('section', section) // <- FILTRO POR SECCIÓN
           .gte('day', format(monthStart, 'yyyy-MM-dd'))
           .lte('day', format(monthEnd, 'yyyy-MM-dd'));
 
@@ -47,10 +48,10 @@ export function Calendar({ onDayClick, section }: CalendarProps) {
 
         if (data && data.length > 0) {
           const daysSet = new Set(data.map(item => item.day));
-          console.log(`✅ ${daysSet.size} días con comentarios encontrados`);
+          console.log(`✅ ${daysSet.size} días con comentarios encontrados para sección ${section}`);
           setDaysWithComments(daysSet);
         } else {
-          console.log("ℹ️ No hay comentarios este mes");
+          console.log(`ℹ️ No hay comentarios este mes para sección ${section}`);
           setDaysWithComments(new Set());
         }
       } catch (error) {
@@ -60,15 +61,16 @@ export function Calendar({ onDayClick, section }: CalendarProps) {
 
     fetchDaysWithComments();
 
-    // 🔄 Suscripción en tiempo real
+    // 🔄 Suscripción en tiempo real - FILTRAR POR SECCIÓN
     const channel = supabase
-      .channel('calendar_comments_tracker')
+      .channel(`calendar_comments_tracker_${section}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'day_comments'
+          table: 'day_comments',
+          filter: `section=eq.${section}` // <- FILTRO POR SECCIÓN
         },
         () => {
           fetchDaysWithComments(); // Recargar cuando haya cambios
@@ -79,7 +81,7 @@ export function Calendar({ onDayClick, section }: CalendarProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [monthStart, monthEnd]);
+  }, [monthStart, monthEnd, section]); // Añadir section a las dependencias
 
   const firstDayOfWeek = getDay(monthStart);
   const emptyDays = Array.from({ length: firstDayOfWeek }, (_, i) => i);
@@ -184,7 +186,7 @@ export function Calendar({ onDayClick, section }: CalendarProps) {
                   )}
                 </div>
               )}
-              {/* 🚨 CAMBIO CRÍTICO: Mostrar etiqueta a TODOS */}
+              {/* 🚨 CAMBIO CRÍTICO: Mostrar etiqueta por SECCIÓN */}
               {hasComments && (
                 <Tag className="h-2.5 w-2.5 text-primary absolute top-0.5 right-0.5" />
               )}

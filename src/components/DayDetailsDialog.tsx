@@ -22,6 +22,7 @@ interface DayDetailsDialogProps {
   onOpenChange: (open: boolean) => void;
   date: Date | null;
   assignments: Assignment[];
+  section: "A" | "B"; // <- NUEVO PROP PARA LA SECCIÓN
 }
 
 export function DayDetailsDialog({
@@ -29,6 +30,7 @@ export function DayDetailsDialog({
   onOpenChange,
   date,
   assignments,
+  section, // <- RECIBIR LA SECCIÓN
 }: DayDetailsDialogProps) {
   const { isAuthenticated } = usePinAuth();
   const [activeTab, setActiveTab] = useState("tareas");
@@ -171,7 +173,7 @@ export function DayDetailsDialog({
               )}
 
               {/* COMPONENTE DE COMENTARIOS - IMPORTANTE: VISIBLE PARA TODOS */}
-              <DayComments date={date} />
+              <DayComments date={date} section={section} />
 
               {/* INFORMACIÓN ADICIONAL */}
               <div className="text-xs text-muted-foreground p-3 bg-muted/20 rounded-lg">
@@ -181,6 +183,7 @@ export function DayDetailsDialog({
                   <li>• Solo usuarios autenticados pueden añadir nuevos comentarios</li>
                   <li>• Los comentarios se actualizan en tiempo real</li>
                   <li>• Fecha del día: {format(date, "dd/MM/yyyy")}</li>
+                  <li>• Sección: {section}</li>
                 </ul>
               </div>
             </div>

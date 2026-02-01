@@ -12,9 +12,10 @@ type Comment = Tables<'day_comments'>;
 
 interface DayCommentsProps {
   date: Date;
+  section: "A" | "B"; // <- NUEVO PROP PARA LA SECCIÓN
 }
 
-export function DayComments({ date }: DayCommentsProps) {
+export function DayComments({ date, section }: DayCommentsProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -24,16 +25,17 @@ export function DayComments({ date }: DayCommentsProps) {
   const currentDay = format(date, 'yyyy-MM-dd');
   const { isAuthenticated } = usePinAuth();
 
-  // 🔄 Cargar comentarios - FUNCIONA para TODOS
+  // 🔄 Cargar comentarios - FILTRADO POR SECCIÓN
   const loadComments = async () => {
     try {
-      console.log(`📥 Cargando comentarios para: ${currentDay}`);
+      console.log(`📥 Cargando comentarios para: ${currentDay}, sección: ${section}`);
       setError(null);
       
       const { data, error } = await supabase
         .from('day_comments')
         .select('*')
         .eq('day', currentDay)
+        .eq('section', section) // <- FILTRO IMPORTANTE POR SECCIÓN
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -42,7 +44,7 @@ export function DayComments({ date }: DayCommentsProps) {
         return;
       }
 
-      console.log(`✅ ${data?.length || 0} comentarios cargados`);
+      console.log(`✅ ${data?.length || 0} comentarios cargados para sección ${section}`);
       setComments(data || []);
       setError(null);
 
@@ -55,16 +57,16 @@ export function DayComments({ date }: DayCommentsProps) {
   useEffect(() => {
     loadComments();
 
-    // 🔔 Suscripción en tiempo real
+    // 🔔 Suscripción en tiempo real - FILTRADO POR SECCIÓN Y DÍA
     const channel = supabase
-      .channel(`comments_${currentDay}`)
+      .channel(`comments_${section}_${currentDay}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'day_comments',
-          filter: `day=eq.${currentDay}`
+          filter: `day=eq.${currentDay}and section=eq.${section}`
         },
         () => {
           console.log("🔄 Cambio detectado, recargando...");
@@ -76,7 +78,7 @@ export function DayComments({ date }: DayCommentsProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [currentDay, retryCount]);
+  }, [currentDay, section, retryCount]);
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
@@ -91,7 +93,7 @@ export function DayComments({ date }: DayCommentsProps) {
     setError(null);
     
     try {
-      console.log("📤 Enviando comentario...");
+      console.log("📤 Enviando comentario para sección:", section);
       
       const { data, error } = await supabase
         .from('day_comments')
@@ -99,6 +101,7 @@ export function DayComments({ date }: DayCommentsProps) {
           {
             text: newComment.trim(),
             day: currentDay,
+            section: section, // <- INCLUIR LA SECCIÓN AL INSERTAR
             user_name: 'Moderador'
           }
         ])
@@ -128,14 +131,23 @@ export function DayComments({ date }: DayCommentsProps) {
 
   return (
     <div className="space-y-4">
-      {/* ENCABEZADO */}
+      {/* ENCABEZADO - MUESTRA LA SECCIÓN */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <MessageCircle className="h-5 w-5 text-primary" />
           <h3 className="font-semibold">Comentarios del día</h3>
-          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-            {currentDay}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+              {currentDay}
+            </span>
+            <span className={`text-xs px-2 py-1 rounded-full ${
+              section === 'A' 
+                ? 'bg-blue-500/10 text-blue-600' 
+                : 'bg-emerald-500/10 text-emerald-600'
+            }`}>
+              Sección {section}
+            </span>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           {!isAuthenticated && (
@@ -220,7 +232,7 @@ export function DayComments({ date }: DayCommentsProps) {
             Comentarios públicos ({comments.length})
           </h4>
           <span className="text-xs text-muted-foreground">
-            {comments.length > 0 ? "Todos pueden ver" : "Sin comentarios"}
+            {comments.length > 0 ? `Sección ${section}` : "Sin comentarios"}
           </span>
         </div>
 
@@ -276,6 +288,7 @@ export function DayComments({ date }: DayCommentsProps) {
             </div>
             <div>📅 Día: {currentDay}</div>
             <div>💬 Comentarios: {comments.length}</div>
+            <div>🏷️ Sección: {section}</div>
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-1">
