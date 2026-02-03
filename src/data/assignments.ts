@@ -31,7 +31,7 @@ export const assignments: Assignment[] = [
     type: "Prueba",
     points: 4,
     percentage: 20,
-    date: "2026-02-03", // Martes - válido
+    date: "2026-02-05", // Jueves - modificado
     color: "quimica"
   },
   {
@@ -333,7 +333,7 @@ export const assignments: Assignment[] = [
     type: "Prueba",
     points: 4,
     percentage: 20,
-    date: "2026-02-02", // Lunes - válido
+    date: "2026-02-05", // Jueves - cambiado
     color: "ghc"
   },
   {
@@ -343,7 +343,7 @@ export const assignments: Assignment[] = [
     type: "Exposiciones",
     points: 4,
     percentage: 20,
-    date: "2026-02-05", // Jueves - válido
+    date: "2026-02-09", // lunes - válido
     notes: "Del lunes 2 al 12 (cambio de fecha)",
     color: "ghc"
   },
