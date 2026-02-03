@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Dna, RefreshCw, Download, Info, Grid3x3, 
   Copy, Calculator, ZoomIn, ZoomOut, Sparkles,
-  ChevronDown, BookOpen, Beaker, Settings2
+  ChevronDown, BookOpen, Beaker, Settings2, GitBranch, Layers
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,8 @@ import { cn } from "@/lib/utils";
 import { OrganismSelector } from "./genetics/OrganismSelector";
 import { PunnettGrid } from "./genetics/PunnettGrid";
 import { ResultsDisplay } from "./genetics/ResultsDisplay";
+import { PedigreeChart } from "./genetics/PedigreeChart";
+import { PolygenicCalculator } from "./genetics/PolygenicCalculator";
 import { CROSS_TYPES, DISPLAY_MODES, EXAMPLE_CROSSES, DEFAULT_ALLELE_CONFIGS } from "./genetics/constants";
 import { 
   CrossResult, AlleleConfig, CrossType, DisplayMode, ZoomLevel, ParentGenotypes, TraitPreset, OrganismPreset 
@@ -30,7 +32,10 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
+type SimulatorMode = "punnett" | "pedigree" | "polygenic";
+
 export function PunnettCalculator() {
+  const [simulatorMode, setSimulatorMode] = useState<SimulatorMode>("punnett");
   const [crossType, setCrossType] = useState<CrossType>("mono");
   const [displayMode, setDisplayMode] = useState<DisplayMode>("genotype");
   const [zoomLevel, setZoomLevel] = useState<ZoomLevel>(3);
@@ -194,9 +199,9 @@ export function PunnettCalculator() {
                 Simulador Genético Profesional
               </h1>
               <p className="text-muted-foreground">
-                Cuadros de Punnett con organismos reales y análisis completo
+                Cruces mendelianos, árboles genealógicos y herencia poligénica
               </p>
-              {selectedOrganism && (
+              {selectedOrganism && simulatorMode === "punnett" && (
                 <Badge variant="secondary" className="mt-1 gap-1">
                   <span>{selectedOrganism.icon}</span>
                   {selectedOrganism.name}
@@ -205,36 +210,70 @@ export function PunnettCalculator() {
             </div>
           </div>
           
-          <div className="flex gap-2 flex-wrap">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowOrganismSelector(!showOrganismSelector)} 
-              className="gap-2"
-            >
-              <Beaker className="h-4 w-4" />
-              {showOrganismSelector ? "Cerrar" : "Organismos"}
-            </Button>
-            <Button variant="outline" onClick={handleCopyResults} className="gap-2" disabled={!result}>
-              <Copy className="h-4 w-4" />
-              Copiar
-            </Button>
-            <Button onClick={handleDownload} className="gap-2 bg-[hsl(var(--biology))] hover:bg-[hsl(var(--biology))]/90" disabled={!result}>
-              <Download className="h-4 w-4" />
-              Exportar
-            </Button>
-          </div>
+          {simulatorMode === "punnett" && (
+            <div className="flex gap-2 flex-wrap">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowOrganismSelector(!showOrganismSelector)} 
+                className="gap-2"
+              >
+                <Beaker className="h-4 w-4" />
+                {showOrganismSelector ? "Cerrar" : "Organismos"}
+              </Button>
+              <Button variant="outline" onClick={handleCopyResults} className="gap-2" disabled={!result}>
+                <Copy className="h-4 w-4" />
+                Copiar
+              </Button>
+              <Button onClick={handleDownload} className="gap-2 bg-[hsl(var(--biology))] hover:bg-[hsl(var(--biology))]/90" disabled={!result}>
+                <Download className="h-4 w-4" />
+                Exportar
+              </Button>
+            </div>
+          )}
         </div>
 
-        {/* Selector de Organismos */}
-        {showOrganismSelector && (
-          <div className="mb-6 animate-fade-in">
-            <OrganismSelector 
-              onSelectTraits={handleOrganismTraitsSelect}
-              selectedCount={alleleConfigs.length}
-              maxTraits={getAlleleCount() / 2}
-            />
-          </div>
+        {/* Selector de Modo del Simulador */}
+        <Tabs value={simulatorMode} onValueChange={(v) => setSimulatorMode(v as SimulatorMode)} className="mb-6">
+          <TabsList className="w-full rounded-xl p-1 bg-muted/50 h-auto flex-wrap">
+            <TabsTrigger value="punnett" className="flex-1 gap-2 py-3 data-[state=active]:bg-background">
+              <Grid3x3 className="h-4 w-4" />
+              <span className="hidden sm:inline">Cuadro de Punnett</span>
+              <span className="sm:hidden">Punnett</span>
+            </TabsTrigger>
+            <TabsTrigger value="pedigree" className="flex-1 gap-2 py-3 data-[state=active]:bg-background">
+              <GitBranch className="h-4 w-4" />
+              <span className="hidden sm:inline">Árbol Genealógico</span>
+              <span className="sm:hidden">Pedigrí</span>
+            </TabsTrigger>
+            <TabsTrigger value="polygenic" className="flex-1 gap-2 py-3 data-[state=active]:bg-background">
+              <Layers className="h-4 w-4" />
+              <span className="hidden sm:inline">Herencia Poligénica</span>
+              <span className="sm:hidden">Poligénica</span>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {/* Contenido según modo */}
+        {simulatorMode === "pedigree" && (
+          <PedigreeChart />
         )}
+
+        {simulatorMode === "polygenic" && (
+          <PolygenicCalculator />
+        )}
+
+        {simulatorMode === "punnett" && (
+          <>
+            {/* Selector de Organismos */}
+            {showOrganismSelector && (
+              <div className="mb-6 animate-fade-in">
+                <OrganismSelector 
+                  onSelectTraits={handleOrganismTraitsSelect}
+                  selectedCount={alleleConfigs.length}
+                  maxTraits={getAlleleCount() / 2}
+                />
+              </div>
+            )}
 
         {/* Tipo de Cruce */}
         <div className="space-y-4">
@@ -494,10 +533,12 @@ export function PunnettCalculator() {
             </div>
           </div>
         </div>
+          </>
+        )}
       </Card>
 
-      {/* Resultados */}
-      {result && isValidCross && (
+      {/* Resultados (solo en modo Punnett) */}
+      {simulatorMode === "punnett" && result && isValidCross && (
         <div className="space-y-6 animate-fade-in">
           {/* Cuadro de Punnett */}
           <Card className="p-5 rounded-2xl shadow-md">
