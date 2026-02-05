@@ -291,7 +291,7 @@ export const assignments: Assignment[] = [
     type: "Taller #1",
     points: 4,
     percentage: 20,
-    date: "2026-02-4", // Proximo miercoles
+    date: "2026-02-6", // Proximo viernes
     color: "matematicas"
   },
   {
